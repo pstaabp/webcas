@@ -166,6 +166,7 @@ and typing "toDecimal" in the input box results in
      
      <div id="settingsinside">
     <table>
+      <tr><td>Simplex Method mode: <input id="simplexMode" type="checkbox"></input></td></tr>
       <tr><td>Vertical Line before last column: <input id="vertLine" type="checkbox"></input></td></tr>
       <tr><td>Horizontal Line before last row:<input id="horizLine" type="checkbox"></input></td></tr>
       <tr><td>Vertical Line to separate out slack variables:</td></tr>
@@ -201,27 +202,6 @@ and typing "toDecimal" in the input box results in
     
     <p>The <em>Show LaTeX button</em> produces a button on the input line.  This is used by those who typeset in
     LaTeX and this is an easy way to import matrices into a LaTeX document.  </p>
-<!--    <p>If you check the column headers checkbox, then the matrix will have headers on the columns.  The format of the
-    columns is dictated by the Header string in the textbox above.  Separate the column names by commas and each should
-    only be one character (or with subscripts) for correct formatting.  For example, the header string "x,y,z" may
-    give a matrix that looks like:
-    \[  \begin{array}{c} \begin{array}{rrrr} x & y & z & \end{array} \\
-    \left[ \begin{array}{rrr|r} 1 & 2 & 3 & 4 \\
-    5 & 6 & 7 & 8 \\
-    9 & 10 & 11 & 12 \end{array} \right] \end{array}\] </p>
-    
-    <p>The headers can also take on subscripts, as in the following matrix that often arises from
-    Linear Programming problems:
-    \[ \begin{array}{c} \begin{array}{rrrr} x_1 & x_2 & x_3 & s_1 & s_2 & z & \end{array} \\
-    \left[ \begin{array}{rrrrrr|r}
-    2 & 3 & 4 & 1 & 0 & 0 & 24 \\
-    3 & 5 & 2 & 0 & 1 & 0 & 60 \\ \hline
-    -3 & -2 & -4 & 0 & 0 & 1 & 0 \\
-    \end{array} \right] \end{array}\]
-    In this situation, the column header string is "x_1,x_2,x_3,s_1,s_2,z"
-    </p>
-     
-     -->
      </div>
       
   </div>

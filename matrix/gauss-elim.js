@@ -15,28 +15,26 @@ $j(document).ready(function()
         $j("#clear-matrix-button").click(function () { $j("#matrix-entry").val('');} ); 
         $j("#store-matrix-button").click(function () { storeMatrix();} ); 
         $j("#restart-button").click(function () { restart();} ); 
-	$j("#set-link").click(function() {$j("#settings").show("blind",null,"normal",null); return false;});
+      	$j("#set-link").click(function() {$j("#settings").show("blind",null,"normal",null); return false;});
         $j("#help-link").click(function() {$j("#help").show("blind",null,"normal",null); return false;});
 	
 	// Manage the settings.  Lookup if they have been stored, if not create new settings.  
 	
-	if (!('localStorage' in window && window['localStorage'] !== null) || (localStorage.getItem("GEset")==null) )
-	{
-            settings = {vertLine: false, horizLine: false, slackLine: "none", firstColLine: false, addRow: false, showLaTeX: false};
-	    
-	} else
-	{
+	if (!('localStorage' in window && window['localStorage'] !== null) || (localStorage.getItem("GEset")==null) ){
+    settings = {simplexMode: false, vertLine: false, horizLine: false, slackLine: "none", 
+                firstColLine: false, addRow: false, showLaTeX: false};	    
+	} else	{
 	    settings = JSON.parse(localStorage.getItem("GEset"));
+      $j("#simplexMode").attr("checked",settings.simplexMode);
 	    $j("#vertLine").attr("checked",settings.vertLine);
 	    $j("#horizLine").attr("checked",settings.horizLine);
 	    $j("#numSlackVars").attr("disabled",true);
 	    if (settings["slackLine"]=="none") {$j("#slackLine[value='none']").attr("checked","checked");}
 	    else if (settings["slackLine"]=="std") {$j("#slackLine[value='std']").attr("checked","checked");}
-	    else if (parseInt(settings["slackLine"])>-1)
-	    {
-		$j("#numSlackVars").attr("disabled",false);
-		$j("#numSlackVars").val(settings["slackLine"]);
-		$j("#slackLine[value='custom']").attr("checked","checked");
+	    else if (parseInt(settings["slackLine"])>-1){
+    		$j("#numSlackVars").attr("disabled",false);
+    		$j("#numSlackVars").val(settings["slackLine"]);
+    		$j("#slackLine[value='custom']").attr("checked","checked");
 	    }
 	    $j("#firstColLine").attr("checked",settings.firstColLine);
 	    $j("#addRow").attr("checked",settings.addRow);
@@ -69,10 +67,8 @@ function restart()
     $j("#output").html("");
     $j("#matrix-div").css("display","block");
     $j("#matrix-entry").val(matrices[0].toString().gsub('<br/>',"\n").gsub(","," "));
-    matrices = new Array(0);
-    step = new Array(0);
-    step[0]=0;
-    matrices = new Array();
+    step = [0];
+    matrices = [];
 }
 
 
@@ -89,10 +85,15 @@ function storeMatrix()
     
     var convertToRational = false; 
     
-    if(matrices[0].isDecimal()){convertToRational = confirm("Your matrix contains decimals and often it's difficult to work with matrices of decimals.  Would you like to convert the decimals to rationals?");}
+    if(matrices[0].isDecimal()){
+      convertToRational = confirm("Your matrix contains decimals and often it's difficult to work with matrices of decimals. "
+          + "  Would you like to convert the decimals to rationals?");
+    }
     
-    if(convertToRational)
-    {matrices[0] = matrices[0].toRational();}
+    if(convertToRational){matrices[0] = matrices[0].toRational();}
+
+    if(settings.simplexMode){matrices[0].SMMultiplier = new Integer(1);}
+
     
     $j("#output").append("<div id='orig-matrix'> \\[" + decorateMatrix(matrices[0]) + "\\] </div>");
     $j("#matrix-div").css("display","none");

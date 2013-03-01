@@ -217,13 +217,33 @@ Matrix.prototype.pivot = function (row,col)
 
 Matrix.prototype.pivotPreserveIntegers = function (row,col)
 {
-  var m = this.clone();
+  var m = this.clone()
+      ,factor1 = Integer.ONE
+      ,factor2 = Integer.ONE;
 
-  if (m.arr[row][col].compareTo(Integer.ZERO)<0)
-  {
-    m = m.multiplyRowBy(row, new Integer(-1));
-  }
+  if (this.SMMultiplier){
+
+    if (m.arr[row][col].compareTo(Integer.ZERO)<0){
+      factor2 = new Integer(-1);
+    } else {
+      factor1 = new Integer(-1);
+    }
+
   
+    for(var k = 0; k < this.arr.length; k++)
+      if (k != row){
+        m = m.multiplyRowBy(row,new Multiply(factor1, new Divide(m.arr[k][col],this.SMMultiplier)),
+                            k,new Multiply(factor2,new Divide(m.arr[row][col],this.SMMultiplier)));
+      }
+    m = m.multiplyRowBy(row,factor2);
+    m.SMMultiplier = m.arr[row][col];
+    return m
+  }
+
+  if (m.arr[row][col].compareTo(Integer.ZERO)<0){
+    m = m.multiplyRowBy(row,new Integer(-1));
+  }
+
   var factor = m.arr[row][col]
   
   for(var i = 0; i < this.arr.length; i++)
