@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-script-type" content="text/javascript">
+
+<title>WebCAS -- Gaussian Eliminator</title>
+<style type="text/css">
+@import "../style/webcas.css";
+@import url("matrix-ops.css");
+
+</style>
+
+<script type="text/javascript" src="../../scripts/MathJax1.1/MathJax.js?config=TeX-AMS_HTML.js"></script>
+<script type="text/javascript" src="../common/prototype.js">  </script> 
+<script type="text/javascript" src="../common/jquery.min.js">  </script>
+
+<script type="text/javascript" src="../common/functions.js"></script>
+<script type="text/javascript" src="../common/constants.js"></script>
+<script type="text/javascript" src="../common/matrix-operations.js"></script>
+
+<link type="text/css" href="../style/jquery-ui-dialog.css" rel="Stylesheet" />
+<script type="text/javascript" src="../common/jquery-ui-dialog.min.js"></script>
+
+<script type="text/javascript" src="gauss-elim.js"> </script>
+
+</head>
+
+<body>
+
+  <div id="breadcrumbs">
+      <a href="../index.html">WebCAS</a> &gt; <span>Matrices</span> &gt; <span>Gaussian Eliminator</span>
+
+      <span id="set-link" class="link">Settings</span>
+      <span id="help-link" class="link">Help</span>
+
+    </div>
+    <h2>Gaussian Eliminator</h2>
+    <p style="font-size: 75%">Click the help link in the upper right corner.</p>
+    
+    <p style="width: 600px; font-size:80%">
+Enter a matrix (each row on a separate line, each number separated by a space):  <span style="padding-left:100px">
+<button id="restart-button">Restart</button></span>
+</p>
+    <div id="matrix-div">
+    <table><tbody><tr><td>
+      <textarea id="matrix-entry" cols="60" rows="12" ></textarea></td><td>
+      <button id="clear-matrix-button">Clear Matrix</button><br/>
+      <button id="store-matrix-button">Enter Matrix</button></td></tr></tbody></table>
+    </div>
+    
+    <div id="output" > </div>
+    
+    
+    <div id="help">
+      <span style="text-decoration: underline">Help for Gaussian Eliminator</span>
+      <span style="position: absolute; right: 10px;" onclick="$j('#help').hide()" class="link">Close</span>
+      <div id="helpinside">
+      <p>Here you can perform row operations on a matrix to perform Gaussian Elimination
+      and Gauss-Jordon Elimination.  A <a href="http://falcon.fsc.edu/pstaab/video/gauss-elim.html">video</a> is available
+      to watch the basic way to use the webpage. </p>
+      
+      <h3>Row Operations</h3>
+      <p>There are three basic row operations that are performed on a matrix.  Any combination of these operations leaves a matrix row equivalent to the original matrix.</p> 
+            
+      <ul>
+      <li><span style="font-weight: bold"> Multiply a Row by a constant</span>
+      
+      To multiply a row by a constant, use the input <tt>2*R1-&gt;R1</tt> which multiplies row 1 by 2.   Often the row on the right side of the <tt>-&gt;</tt> is left off such as <tt>2*R1</tt>.  The multiplication sign <tt>*</tt> is also optional.  Note:  the arrow <tt>-></tt> is entered as a dash <tt>-</tt> followed by the greater than symbol <tt>&gt;</tt></li>
+      
+      <li><span style="font-weight: bold">Multiply a row by a constant and add to another.</span>  To add rows 1 and 2 and place the result in row 2, type <tt>R1+R2->R2</tt>.  One can also multiply rows by constants.  For example, <tt>-3R1+R3->R3</tt> or <tt>R1+(11/2)R2->R2</tt>. </li>
+
+      <li><span style="font-weight: bold">Swap two rows</span> To swap two rows, type the two rows to swap separated by &lt;-&gt; (This should look like a double-headed arrow.)  For example, <tt>R1&lt;-&gt;R3</tt> swaps rows 1 and 3. </li>
+      
+      
+      </ul>
+      
+      <h3>Multiple Row Operations</h3>
+      
+      <p>As long as the operations are not both placed in the same row, two operations may be done at once.  Each operation should be separated by a comma.  For example, the following matrix: 
+
+        \[ \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{array} \right]  \]
+
+The two row operations <tt>-4R1+R2->R2, -7R1+R3->R3</tt> will lead to the matrix:
+
+        \[  \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 0 & -3 & -6 \\ 0 & -6 & -12 \end{array} \right] \]
+        </p>
+      
+        <h3>Pivoting</h3>
+        
+        <p>When performing row operations on a matrix, it is desireable to have an 1 on some row of a column and zeros on the rest of the column.
+        This is often referred to as <b>pivoting</b> about an element.  For example, if we take the matrix:
+        
+        \[ \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{array} \right]  \]
+        </p>
+          
+         <p>and wish to get a 1 in the first row, second column, we would perform the following row operations:</p>
+         <ol>
+         <li> \(\frac{1}{2} R_1 \rightarrow R_1 \) </li>
+        
+        <li>
+          \(-5R_1 + R_2 \rightarrow R_2 \)
+        </li>
+         <li>\( -8 R_1 + R_3 \rightarrow R_3  \)</li>
+        </ol>
+        
+        <p>Which returns in the following matrix:</p>
+        
+ <p>
+        \[ \left[ \begin{array}{rrr} 1/2 & 1 & 3/3 \\ 3/2 & 0 & -3/2 \\ 3 & 0 & -3 \end{array} \right]  \]
+        </p>
+ 
+ 
+      
+<p>This can be done with the <tt>pivot</tt> command which has the form: <tt>pivot(i,j)</tt> which pivots about the ith row and jth column. For example, the above pivot can be done with the command <tt>pivot(1,2)</tt>.  </p>
+
+<p>In addition, there is a pivot command called <tt>piv</tt> that doesn't introduce more fractions into the matrix.  (However, if fractions are already present, then they will remain).  This performs similar row operations to that of the <tt>pivot</tt> to get a column which is a multiple of the identity matrix.  For example, we will
+ redo the pivot command to the matrix above
+ 
+ \[ \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{array} \right]  \]
+        </p>
+        <p>Applying <tt>piv(1,2)</tt>, the resulting matrix is:
+        
+        \[  \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 1 & 0 & -1 \\ 1 & 0 & -1 \end{array} \right] \]
+ 
+        </p>
+        
+        <h4>Converting a matrix to Decimals</h4>
+        
+        <p>The command <tt>toDecimal</tt> will convert all the rational numbers to decimals (usually about 15 decimal places).   For example starting with the matrix:
+        \[ \left[ \begin{array}{rr} 1/2 & 1/3 \\ 4/9 & 1/7 \end{array} \right]\]
+and typing "toDecimal" in the input box results in
+\[ \left[ \begin{array}{rr} 0.5 &0.4444444444444444 \\ 0.3333333333333333& 0.14285714285714285\end{array}\right]\]
+        </p>
+
+        <h3>Errors and Troubleshooting</h3>
+      
+      <p>A number of errors can arise from various forms of input.  The main error arises from a bad parsing error.  </p>
+      
+      <h4>Errors on entering a matrix</h4>
+      <p>The matrix should be entered as each row on a separate line in the text box.  Each element of the matrix should be separated by spaces and each element can either be an integer, rational (entered with a <tt>/</tt>) or decimal.  Its important that each row has the same number of elements.  </p>
+      
+      <h4>Errors on row operations</h4>
+      
+      <p>Although the input on row operations is fairly flexible, there are a few things to keep in mind.</p>
+      
+      <ul>
+        <li>All row operations use a CAPITAL R. </li>
+      <li>On row swaps, this should be entered only as <tt>R1&lt;-&gt;R2</tt> for example.</li>
+      
+      <li>On operations with mulitplying rows, the multiplication sign is optional.  For example either <tt>2*R1-&gt;R1</tt> or <tt>2R1-&gt;R1</tt> can be used.  </li>
+      
+      <li>If a rational number (fraction) is used as multiplication, then it should be surrounded by parentheses. For example, <tt>(1/2)R2-&gt;R2</tt>.</li>
+      
+      <li>The row on the right hand side of the arrow <tt>-&gt;</tt> is optional.  If it is left off, it is assumed that the resultant row is the last row entered.  For example, the row operations: <tt>4R1+R3->R3</tt> and <tt>4R1+R3</tt> are equivalent.  </li>
+      
+      </ul>
+      
+      </div>
+    </div>
+
+  <div id="settings">
+     <span style="text-decoration: underline">Settings for the Gaussian Eliminator</span>
+      <span style="position: absolute; right: 10px;" onclick="$j('#settings').hide()"  class="link">Close</span>
+     
+     <div id="settingsinside">
+    <table>
+      <tr><td>Vertical Line before last column: <input id="vertLine" type="checkbox"></input></td></tr>
+      <tr><td>Horizontal Line before last row:<input id="horizLine" type="checkbox"></input></td></tr>
+      <tr><td>Vertical Line to separate out slack variables:</td></tr>
+      <tr><td><input id="slackLine" name="slackLine" value="none" type="radio" checked="checked">None
+      <input id="slackLine" name="slackLine" value="std" type="radio">Standard
+      <input id="slackLine" name="slackLine" value="custom" type="radio">Custom:
+      <input id="numSlackVars" input="text" size="3" disabled="true"></td></tr>
+      <tr><td>Vertical Line to separate out first column:<input id="firstColLine" type="checkbox"></input></td></tr>
+      <tr><td>Include Add Row/Col to Simplex Tableau Button<input id="addRow" type="checkbox"></input></td></tr>
+      <tr><td>Include LaTeX button: <input id="showLaTeX" type="checkbox"></input></td></tr>
+<!--      <tr><td>Column Headers:<input id="colhead" type="checkbox"></input></td><td></td></tr>
+      <tr><td>Header String:<input id="headerstr" type="input" size="45"></input></td></tr> -->
+    </table>
+    
+    <p>The above settings have 2 effects.  The first 4 options add horizontal and vertical lines at standard places
+    in a matrix.  This generally is used for visual effect and clarity.
+    <ul>
+      <li>The first option puts a vertical line before last column and is generally
+    used for standard row operations to solve using Gauss-Jordon or Gaussian Elimination. </li>
+      <li>The 2nd option is to separate the last row (called the <b>objective row</b>) in a simplex tableau. </li>
+      <li> The 3rd option separates out the <b>slack variables</b> from the regular variables in a simplex tableau.  Selecting
+      "none" adds no additional vertical line.  The "Standard" selection calculates the number of regular variables by
+      assuming that each constraint generates a slack variable.  The "custom" selection asks the user for the number of
+      slack variables; this is often used for equality constraints.  Note: <em>the objective variable is not counted as a
+      slack variable in the custom setting. </em> </li> 
+    </ul>      
+  </p>
+    
+    <p>The <em>Include Add Row/Col to Simplex Tableau Button</em> is for advanced operations usually involved with Linear Programming
+    (Linear Optimization).  Selecting this checkbox determines whether or not an <em>Add Row/Col</em> button appears as an option on the
+    input line.  Clicking on the button then adds a row (just above the objective row) that the user can input.  In addition, a column of zeros
+    is added just to the left of the last column. </p> 
+    
+    <p>The <em>Show LaTeX button</em> produces a button on the input line.  This is used by those who typeset in
+    LaTeX and this is an easy way to import matrices into a LaTeX document.  </p>
+<!--    <p>If you check the column headers checkbox, then the matrix will have headers on the columns.  The format of the
+    columns is dictated by the Header string in the textbox above.  Separate the column names by commas and each should
+    only be one character (or with subscripts) for correct formatting.  For example, the header string "x,y,z" may
+    give a matrix that looks like:
+    \[  \begin{array}{c} \begin{array}{rrrr} x & y & z & \end{array} \\
+    \left[ \begin{array}{rrr|r} 1 & 2 & 3 & 4 \\
+    5 & 6 & 7 & 8 \\
+    9 & 10 & 11 & 12 \end{array} \right] \end{array}\] </p>
+    
+    <p>The headers can also take on subscripts, as in the following matrix that often arises from
+    Linear Programming problems:
+    \[ \begin{array}{c} \begin{array}{rrrr} x_1 & x_2 & x_3 & s_1 & s_2 & z & \end{array} \\
+    \left[ \begin{array}{rrrrrr|r}
+    2 & 3 & 4 & 1 & 0 & 0 & 24 \\
+    3 & 5 & 2 & 0 & 1 & 0 & 60 \\ \hline
+    -3 & -2 & -4 & 0 & 0 & 1 & 0 \\
+    \end{array} \right] \end{array}\]
+    In this situation, the column header string is "x_1,x_2,x_3,s_1,s_2,z"
+    </p>
+     
+     -->
+     </div>
+      
+  </div>
+
+  </body>
+</html>
+
+

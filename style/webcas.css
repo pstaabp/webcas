@@ -1,0 +1,40 @@
+body {font-size: 125%;  font-family: Verdana, sans-serif}
+
+
+#matrix-input {display: none; position: absolute; right: 360px; top: 100px;
+width: 400px; border: ridge 3px black; padding: 20px; background-color: rgb(240,255,240)}
+
+#right {position: absolute; overflow: auto; right: 10px; width: 300px; bottom: 20px; top: 35px; border: 1px solid black; padding: 10px}
+
+div#breadcrumbs {font-size: 80%}
+#rightspan {position: absolute; right:5px; cursor: pointer}
+#rightspan:hover {text-decoration: underline;}
+
+#help, #settings {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    top: 10px; 
+    display: none;
+    width: 500px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: rgb(240,255,240); 
+    padding:15px;
+    font-size: 80%;
+    z-index: 10;
+    } 
+
+
+
+#help #close {position: absolute; right: 10px; top: 10px; bottom: 10px;}
+
+#helpinside, #settingsinside {border: 10px; overflow: auto; margin-top: 5px;
+margin-bottom: 5px; padding: 5px; height: 95%}
+
+.closebutton, .link { cursor: pointer}
+
+#help-link {position: absolute; right: 10px;}
+#set-link {position: absolute; right: 75px;}
+button {margin-left: 5px; margin-right: 5px}
+

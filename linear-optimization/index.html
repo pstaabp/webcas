@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+
+
+<head>
+<title>Feasible Set Plotter</title>
+<style type="text/css">
+@import url("../style/webcas.css");
+@import url("feasible-set.css");
+@import url("../slider/css/ui-lightness/jquery-ui-1.8.7.custom.css");
+
+.slider {width: 300px; height: 10px;  }
+.slider-cont {padding: 10px !important;}
+</style>
+<script type="text/javascript" src="../common/prototype.js">  </script>
+<script type="text/javascript" src="../common/functions.js">  </script>
+<script type="text/javascript" src="../common/jquery.min.js"></script>
+<script type="text/javascript" src="../common/parser.js">  </script>
+<script type="text/javascript" src="../common/geom.js">  </script>
+<script type="text/javascript" src="../common/constants.js">  </script>
+<script type="text/javascript" src="../common/inequality.js">  </script>
+
+
+<script type="text/javascript" src="../common/parser.js">  </script>
+
+<script type="text/javascript" src="feasible-set.js"> </script>
+
+</head>
+<body>
+  <div id="breadcrumbs">
+      <a href="../index.xhtml">WebCAS</a> &gt; <span>Feasible-Set Plotter</span>
+
+      <span id="rightspan" onclick="document.getElementById('help').style.display='block'">Help</span>
+
+    </div>
+    <h2>Feasible-Set Plotter</h2>
+  <div id="canvasContainer">
+    <canvas id="lscanvas" width="500" height="500">To use this tool you must be using a modern browser.  See
+    <a href="/webcas2/supported-browsers.html">the list of supported browsers</a>. </canvas>
+</div>
+<br/>
+
+
+<div id="controls">
+<p style="font-size:75%">To begin, enter all linear contraints.  Use &lt;= and &gt;= for less than (greater than) and equal to.  Use x and y as the two variables and put each inequality in the form <tt>ax+by<=c</tt> or <tt>ax+by>=c</tt>.  Then click on the <em>Start</em> button below. </p>
+<textarea cols="40" rows="8" id="inputarea"></textarea>
+
+  <button id="start-button">Start</button>
+  </div>
+
+  <div id="help">
+      <span style="text-decoration: underline">Help for Feasible Set Plotter</span>
+      <canvas id="closebutton" width="20" height="20">X</canvas>
+
+
+      <div id="helpinside">
+      
+
+      </div>
+   </div>
+  </body>
+  </html>

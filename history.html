@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>WebCAS -- Mathematics on the Web</title>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+  <style type="text/css">
+  @import "webcas.css";
+  
+    body { font-family: Delicious, sans-serif; font-size: 110%; }
+
+  
+  #right {position: absolute; left: 635px; right: 10px;  top: 15px;  bottom: 10px;  border: 3px solid black; background: rgb(161,196,225);}
+  
+  #left {font-size: 90%; position: absolute; left: 10px; bottom: 10px; overflow: auto; top: 100px; width: 600px; bottom: 10px;  border: none; margin: 15px}
+  
+  #top {height:40px; background: rgb(196,161,225); width: 953px}
+  
+  #title {font-size: 250%}
+  #minititle {font-size: 40%}
+  </style>
+</head>
+
+<body>
+<div id="top"/>
+<div id="title"><span>WebCAS</span><span id="minititle">a short history</span></div>
+
+<div id="left">
+
+<p>This gives a little bit of history in the WebCAS project as well as my
+background in designing mathematical tools on the web.</p>
+
+
+<p>I helped design a system of mathematical plotters written in Java at the
+University of Colorado at Boulder, called
+<a href="http://amath.colorado.edu/java">the Mathematical Visualization Toolkit</a>.
+I helped write many of the underlying code for the MVT, and the basic
+mathematical object structure is similar in both.  </p>
+
+<p>With the release of Firefox 1.5, a major browser integrated MathML, an xml-based
+storage of mathematical content.  See <a href="http://www.w3.org/math">the World
+Wide Web Consortium</a> for more details on MathML and
+<a href="http://www.mozilla.org/projects/mathml/">the Mozilla MathML website</a>
+for more information about MathML in the Firefox browser. </p>
+
+<p>In the winter of 2010 (and 2011) I altered the code to expand the number of
+browsers that would work with WebCAS.  Technically, instead of relying on MathML
+and SVG (both of which only are only supported by Firefox), I have moved to using
+<a href="http://www.mathjax.org">MathJAX</a> which renders mathematics
+written in <a href="http://www.tug.org">LaTeX</a> using web fonts and javascript.
+Instead of <a href="http://en.wikipedia.org/wiki/Scalable_Vector_Graphics">SVG</a>,
+which is only supported by Firefox, I have used the canvas element, which is
+now supported by all major browsers (including IE, amazingly).  </p>
+
+
+<p>I am not trying to recreate <a href="http://www.wolfram.com/mathematica">Mathematica,</a>
+<a href="http://www.maplesoft.com">Maple</a> or <a href="http://www.mathworks.com/products/matlab/">Matlab</a>
+(or <a href="http://www.sagemath.org">Sage</a>, my current favorite CAS).
+These are all wonderful tools that I have used at different times in my career.
+They are great at being all-purpose tools for solving a large diversity of
+mathematical problems.  WebCAS is a teaching tool, and at their heart, none
+of these software packages are teaching tools.  </p>
+
+
+</div>
+</body>
+</html>

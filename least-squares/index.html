@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html>
+
+
+<head>
+<title>Least-Square Regression Visualizer</title>
+<style type="text/css">
+@import url("../style/webcas.css");
+@import url("least-squares.css");
+@import url("../slider/css/ui-lightness/jquery-ui-1.8.7.custom.css");
+
+.slider {width: 300px; height: 10px;  }
+.slider-cont {padding: 10px !important;}
+</style>
+<script type="text/javascript" src="../common/jquery.min.js"></script>
+<script type="text/javascript" src="../slider/js/jquery-ui-1.8.9.custom.min.js"> </script>
+<script type="text/javascript" src="../common/geom.js">  </script>
+<script type="text/javascript" src="least-squares.js"> </script>
+
+</head>
+<body>
+  <div id="breadcrumbs">
+      <a href="../index.html">WebCAS</a> &gt; <span>Least-Squares Visualizer</span>
+
+      <span id="rightspan" onclick="document.getElementById('help').style.display='block'">Help</span>
+
+    </div>
+    <h2>Least-Squares Visualizer</h2>
+  <div id="canvasContainer">
+    <canvas id="lscanvas" width="500" height="500">To use this tool you must be using a modern browser.  See
+    <a href="/webcas2/supported-browsers.html">the list of supported browsers</a>. </canvas>
+</div>
+<br/>
+
+
+<div id="controls">
+<p style="font-size:75%">To begin, enter your data as two columns below. Then click on the <em>Start</em> button below. </p>
+<textarea cols="20" rows="8" id="inputarea"></textarea>
+
+  <button onclick="parse()">Start</button>
+  </div>
+  
+  <div id="sliderBorder"><p style="font-size: 75%">Use the slider to change the values for <em>m</em> and <em>b</em>.  The goal for least-squares to to find values that make E<sup>2</sup> as small as possible. </p> 
+ <!-- <div id="slidecont1"></div>   
+  <div id="mcont"> m=<input type="text" id="mvalue" size="8"/> </div>
+
+  <div id="slidecont2"></div>
+<div id="bcont">b=<input type="text" size="8" id="bvalue"  /> </div>-->
+
+
+
+<table>
+<tbody>
+<tr><td> m:</td><td> <input type="text" id="slope-value" size="10" ></td>
+<td class="slider-cont"><div id="slope-slider" class="slider"></div></tr>
+<tr><td> b:</td><td> <input type="text" id="intercept-value" size="10" ></td>
+<td><div class="slider" id="intercept-slider"></div></td></tr></tbody></table>
+
+
+  
+  <div><span id="esquared">E<sup>2</sup>= </span></div>
+  <div>Show Error Boxes: <input type="checkbox" checked="checked" id="errbox" /> </div>
+  </div>
+  
+  <div id="bestfit">
+  <p style="font-size: 75%; margin-top: -5px; padding-bottom: -10px">The following button uses the formula for the least-squares line.</p>
+  <button onclick="findBest()">Find least-squares line</button><br/>
+
+  <div id="best"> </div>  
+  <div id="beste2"> </div> 
+</div>  
+
+<div id="menuopt">
+<ul><li id="man-menu" class="tab-menu">Manual</li>
+<li id="auto-menu" class="tab-menu">Auto</li></ul></div>
+
+  <div id="help">
+      <span style="text-decoration: underline">Help for Least Squares Visualizer</span>
+      <canvas id="closebutton" width="20" height="20">X</canvas>
+
+
+      <div id="helpinside">
+      
+      <p>First of all, I have made a short video that goes through a simple example using this tool.  You can find the video 
+      <a href="http://falcon.fsc.edu/pstaab/video/linear-regression.html">here.</a></p>
+      <p>This tools is used to help understand and visualize the method of least-squares regression.     </p>
+      
+      <p>To begin, you need a data set which consists of a number of points with x values and y values.  Enter this data set in the textbox in the upper right with each point on its own line (no commas or parentheses). For example</p>
+      <pre>
+1 2
+2 3
+4 4
+5 5 
+8 10
+</pre>
+<p>Next, click the start button.  You should see the points plotted on the axes on the left side of the screen.  (Note: some points may not scale right on the axes.  Just a little bug to be squashed.)</p>
+
+<h3>Running the Least-Squares Visualizer</h3>
+
+<p>There are two ways to run the least-squares visualizer: in manual mode and in automatic mode.</p>
+
+<h4>Manual Mode</h4>
+
+<p>If you click on the manual tab, you will see two sliders, one for <em>m</em>, the slope of the line and a slider for <em>b</em>, the <em>y</em>-intercept for the line.  You can slide each slider to change the features of the line.  Each point is plotted as a black dot and the square of each residual is plotted as a square (in light red) that connects the dot and the blue line.  </p>
+
+<p>There is also a value of E<sup>2</sup> which is the sum of the squares of the residual (the area of the boxes). The goal of find the best least-square (or regression) line is to find the <em>m</em> and <em>b</em> that minimizes the value of E<sup>2</sup>.</p>
+
+<h4>Auto Mode</h4>
+
+<p>To switch to this mode, click on the "auto" tab on the right side of the screen.  This mode finds the values of <em>m</em> and <em>b</em> that minimizes E<sup>2</sup>.  Click on the button "Find the least-squares line" and up will pop <em>m</em>, <em>b</em> and E<sup>2</sup>.  Also a purple line will appear on the plot with the given slope and intercept.</p>
+
+      </div>
+   </div>
+  </body>
+  </html>
