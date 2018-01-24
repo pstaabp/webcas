@@ -6,12 +6,12 @@
 @import url("matrix-ops.css");
 </style>
 <script type="text/javascript"
-  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
-<script type="text/javascript" src="../common/prototype.js">  </script> 
+<script type="text/javascript" src="../common/prototype.js">  </script>
 <script type="text/javascript" src="../common/jquery.min.js">  </script>
 
-    
+
 <script type="text/javascript" src="../common/functions.js"></script>
 <script type="text/javascript" src="../common/constants.js"></script>
 <script type="text/javascript" src="../common/matrix-operations.js"></script>
@@ -27,27 +27,27 @@
 
     </div>
     <h2>Matrix Operations</h2>
-    
+
     <p style="font-size: 80%; width: 500px;">To start, click the "enter a matrix" button on the right. Then type in matrix operations in the textbox below.
     Read the help pages by clicking on the link in the upper right corner to read all
     the operations that can be performed. </p>
-    
+
     <div id="left-output">
       <table id="output-table"><tbody id="tab"></tbody></table>
-      
+
     </div>
-    
+
     <div id="right">
       <div>
         <button id="enter-matrix-button">Enter a new matrix</button>
       </div>
       <p>Entered Matrices:</p>
-      
+
       <div id="matrices"></div>
-  
+
 
     </div>
-    
+
     <div id="matrix-input">
       <span style="position: absolute; right: 10px;" onclick="$j('#matrix-input').hide()" class="link">Close</span>
       <p>
@@ -58,7 +58,7 @@
       <table><tbody><tr><td>
         <input id="matrix-name" type="text" size="5" />= </td><td>
       <textarea id="matrix-entry" cols="20" rows="6"></textarea></td><td>
-      
+
         <button id="store-matrix-button">Store</button><br/>
         <button id="clear-matrix-button">Clear</button>
         </td></tr></tbody></table>
@@ -71,7 +71,7 @@
     <div id="help">
       <span style="text-decoration: underline">Help for Matrix Operations</span>
      <span style="position: absolute; right: 10px;" onclick="$j('#help').hide()" class="link">Close</span>
- 
+
       <div id="helpinside">
 
         <h4>Overview</h4>
@@ -80,7 +80,7 @@
         <h4>Basic Input</h4>
         <p>In order to start, enter a matrix by clicking on the button "Enter a matrix" on the right side of the page.  Type in a name for the matrix in the first box, and the matrix in the second (larger) box.  Type each element of the matrix separated by spaces and each row of the matrix should be on a separate line. For example, the matrix:
         \[ \left[\begin{array}{rrr} 1 & 2 & 3 \\ 4 & 5 & 6 \\7 & 8 & 9 \end{array} \right] \]
-        
+
         </p>
         <p>Should be entered like:</p>
 <pre>
@@ -103,29 +103,29 @@
 
         <p>Matrices may contain fractional entries.  To include a fraction enter it with the "/".  For example 1/2 should be entered as "1/2".  </p>
 
-    
+
         <p>The operations of addition, subtraction and multiplication are performed with two matrices and use the symbols: +, -, * respectively.  For example, suppose that two matrices called "A" and "B" have been entered.  Then "A*B" will return the product.  </p>
-        
+
         <p>Scalar multiplication of numbers is also defined. Entering <tt>2*A</tt> returns a matrix in which each element of <tt>A</tt> is mutiplied by two.</p>
-        
+
         <p><b>Note:</b>Although it is common to leave out the multiplication sign * when writing matrix operations, like <tt>AB</tt>, you must explicitly put in the multiplication sign.  </p>
-        
+
         <h4>Determinant and inverse</h4>
-        
+
         <p>The determinant can be found using the function <tt>det</tt>.  If <tt>A</tt> is a square matrix, then <tt>det(A)</tt> will return its determinant. Note:  the matrix must be square or an error will be generated. </p>
-        
+
         <p>The inverse can be found using the function <tt>inv</tt>.  If <tt>A</tt> is a square matrix, then <tt>inv(A)</tt> will return its inverse, if it exists.  If not, an error will be shown.  An error will also be generated if the matrix is not square.  </p>
-  
+
         <h4>Gauss-Jordon Elimination</h4>
-        
+
         <p>Gauss-Jordon Elimination or row reduction take a matrix and returns a matrix in reduced row echelon form.  A matrix is in row echelon form if the leading element in each row (the leading element in a row is the left-most non-zero element) has zeros both below it and to its right.   A reduce row echelon form also requires that a leading element is a 1 and it is the only non zero element in its column.  </p>
-        
+
         <p>To perform row reduction on a matrix A, type <tt>rowreduce(A)</tt>.</p>
-        
+
         <h4>Errors and Troubleshooting</h4>
 
         <p>A number of error can occur while using this page.  All errors will give a pop up window indicating what is wrong.  Here is a list of most possible errors:               </p>
-        
+
         <ul>
         <li><b>Matrix Error:</b>  a matrix must have the same number of elements on each row.  If not an error is thrown.</li>
         <li><b>Parsing Error:</b> if one of the elements in the matrix does not parse to a constant, an error will be thrown.  (Note: currently, you cannot put constants pi or e in the matrix, but plans are to allow them).</li>
@@ -145,7 +145,3 @@
 
   </body>
 </html>
-
-
-
-
