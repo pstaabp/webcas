@@ -12,7 +12,7 @@ $j(document).ready(function()
 	step[0]=0;
               
         $j("#settings").css("display","none");
-        $j("#clear-matrix-button").click(function () { $j("#matrix-entry").val('');} ); 
+        $j("#clear-matrix-button").click(function () { $j("#matrix-entry").val(''); $j("#matrix-entry").focus();} ); 
         $j("#store-matrix-button").click(function () { storeMatrix();} ); 
         $j("#restart-button").click(function () { restart();} ); 
       	$j("#set-link").click(function() {$j("#settings").show("blind",null,"normal",null); return false;});
@@ -54,7 +54,8 @@ $j(document).ready(function()
 		$j("#numSlackVars").attr("disabled",false);
 		settings["slackLine"]=$j("#numSlackVars").val();
 		}
-	    localStorage.setItem("GEset",JSON.stringify(settings));});
+        localStorage.setItem("GEset", JSON.stringify(settings));});
+    $j("#matrix-entry").focus();
     });
 	
 	
@@ -69,6 +70,7 @@ function restart()
     $j("#matrix-entry").val(matrices[0].toString().gsub('<br/>',"\n").gsub(","," "));
     step = [0];
     matrices = [];
+    $j("#matrix-entry").focus();
 }
 
 
@@ -80,8 +82,14 @@ function storeMatrix()
 {
     
     try {
-        matrices[0] = new Matrix($j("#matrix-entry").val().replace(/\n/g,";").replace(/;*$/,""));
-    } catch(err) { alert(err); return;}
+        // If the matrix has a \hline in it, turn on the appropriate button
+        if ((/\hline/).test($j("#matrix-entry").val())) {
+            settings.horizLine = true;
+            $j("#horizLine").attr("checked", settings.horizLine);
+        }
+        // Same filter as before, but additionally handles \\, \hline, and & surrounded by any number of spaces. 
+        matrices[0] = new Matrix($j("#matrix-entry").val().replace(/\s*&\s*/g, " ").replace(/\\\\/g, "").replace(/\n/g, ";").replace(/;*$/, "").replace(/\\hline/g, ""));
+    } catch (err) { alert(err); return; }
     
     var convertToRational = false; 
     
@@ -150,7 +158,8 @@ function rowOpInput()
     $j("#enter-button").click(function () { parseRowOp();});
     $j("#undo-button").click(function () { undo();});
     $j("#LaTeX-button").click(function() {showLaTeXcode();});
-    $j("#addRow-button").click(function() {addRowToTableau();});
+    $j("#addRow-button").click(function () { addRowToTableau(); });
+    $j("#input-box").focus();
  	
     
     
@@ -281,6 +290,7 @@ function undo(obj)
         step = new Array(0);
         rowOperation = new Array(0);  
         rowOperationStr = new Array(0);
+        $j("#matrix-entry").focus();
 
         
     }
