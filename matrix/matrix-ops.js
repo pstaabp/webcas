@@ -17,9 +17,9 @@ $j(document).ready(function()
         $j("#settings").css("display","none");
 	$j("#set-link").click(function() {$j("#settings").show("blind",null,"normal",null); return false;});
         $j("#help-link").click(function() {$j("#help").show("blind",null,"normal",null); return false;});
-	$j("#enter-matrix-button").click( function() {$j("#matrix-input").show();});
+        $j("#enter-matrix-button").click(function () { $j("#matrix-input").show(); $j("#matrix-name").focus();});
         $j("#store-matrix-button").click( function() { storeMatrix();});
-        $j("#clear-matrix-button").click(function (){   $j("#matrix-entry").val("");});
+        $j("#clear-matrix-button").click(function (){   $j("#matrix-entry").val("").focus();});
 
         var numKeys= localStorage.length;
         for(var i = 0; i < numKeys; i++)
@@ -45,7 +45,7 @@ function storeMatrix()
 {
    var m;
    try {
-      m = new Matrix($j("#matrix-entry").val().replace(/\n/g,";").replace(/;*$/,""));
+      m = new Matrix($j("#matrix-entry").val());
 
    } catch(err)
    {
@@ -97,7 +97,7 @@ function updateMatrices()
 
          });
       MathJax.Hub.Queue(["Typeset",MathJax.Hub,"right"]);
-
+      $j("#input-text").focus();
    }
 
 
@@ -261,5 +261,5 @@ function editMatrix(num)
    $j("#matrix-input").show();
    var matrixName = storage.keys()[num];
    $j("#matrix-name").val(matrixName);
-   $j("#matrix-entry").val(storage.get(matrixName).toPlainText());
+   $j("#matrix-entry").val(storage.get(matrixName).toPlainText()).focus();
 }

@@ -3,7 +3,11 @@ var step = new Array(0);
 var rowOperation = new Array(0);  // this will store the internal object version of the row operation
 var rowOperationStr = new Array(0);
 var settings = null;
-var $j = jQuery.noConflict();    
+var $j = jQuery.noConflict();
+
+var entries = new Array(0); // Stores the mn class elements of the MathJax typeset matrix
+var indices = {}; // Key : MathJaxId, Value: location in matrix as [m,n]
+var lastClicked; // Holds last clicked element, for changing background color
 
 // Run the following code upon loading the document.
 
@@ -12,7 +16,7 @@ $j(document).ready(function()
 	step[0]=0;
               
         $j("#settings").css("display","none");
-        $j("#clear-matrix-button").click(function () { $j("#matrix-entry").val(''); $j("#matrix-entry").focus();} ); 
+        $j("#clear-matrix-button").click(function () { $j("#matrix-entry").val('').focus();} ); 
         $j("#store-matrix-button").click(function () { storeMatrix();} ); 
         $j("#restart-button").click(function () { restart();} ); 
       	$j("#set-link").click(function() {$j("#settings").show("blind",null,"normal",null); return false;});
@@ -87,8 +91,8 @@ function storeMatrix()
             settings.horizLine = true;
             $j("#horizLine").attr("checked", settings.horizLine);
         }
-        // Same filter as before, but additionally handles \\, \hline, and & surrounded by any number of spaces. 
-        matrices[0] = new Matrix($j("#matrix-entry").val().replace(/\s*&\s*/g, " ").replace(/\\\\/g, "").replace(/\n/g, ";").replace(/;*$/, "").replace(/\\hline/g, ""));
+        
+        matrices[0] = new Matrix($j("#matrix-entry").val());
     } catch (err) { alert(err); return; }
     
     var convertToRational = false; 
@@ -106,8 +110,8 @@ function storeMatrix()
     $j("#output").append("<div id='orig-matrix'> \\[" + decorateMatrix(matrices[0]) + "\\] </div>");
     $j("#matrix-div").css("display","none");
     rowOpInput();
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"orig-matrix"]);
-    
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, "orig-matrix"]);
+
 }
 
 function decorateMatrix(m)
@@ -148,7 +152,8 @@ function rowOpInput()
 {
     var str = "<div id='row-op-input'>input: <input id='input-box' type='text' size='30'></input>" + 
         "<button id='enter-button'>Enter</button>" + 
-        " <button id='undo-button'>Undo</button>";
+        " <button id='undo-button'>Undo</button>" +
+        "<button id='piv-button'>Select Pivot</button>";
     if(settings.showLaTeX){str += "<button id='LaTeX-button'>Show LaTeX</button>"; }
     if(settings.addRow){str += "<button id='addRow-button'>Add Row/Col to Tableau</button>"; }
     str+= "</div>";
@@ -159,11 +164,10 @@ function rowOpInput()
     $j("#undo-button").click(function () { undo();});
     $j("#LaTeX-button").click(function() {showLaTeXcode();});
     $j("#addRow-button").click(function () { addRowToTableau(); });
+    $j("#piv-button").click(clickablePivots);
+    unclickablePivots();
     $j("#input-box").focus();
- 	
-    
-    
-    
+
 }
 
 function addRowToTableau()
@@ -270,7 +274,6 @@ function parseRowOp()
      MathJax.Hub.Queue(["Typeset",MathJax.Hub,"out-" + (step.last())]);
      
      rowOpInput();
-     
      // scroll to the bottom after entering in the input.  
      window.scroll(0,document.body.clientHeight);
     
@@ -290,6 +293,7 @@ function undo(obj)
         step = new Array(0);
         rowOperation = new Array(0);  
         rowOperationStr = new Array(0);
+        unclickablePivots();
         $j("#matrix-entry").focus();
 
         
@@ -315,5 +319,64 @@ function undo(obj)
     
 }
 
+// Called after piv-button is clicked, makes the elements of the currently typeset matrix clickable
+function clickablePivots() {
+    // This sections grabs the current matrix and stores its name and elements
+    var outCount = document.getElementById("output").childElementCount;
+    var outMatrix = document.getElementById("output").children[outCount - 2];
+    var entries = outMatrix.getElementsByClassName("mn");
+    indices = {}; // Clear the global array of indices
+    var numRows = matrices[matrices.length - 1].arr.length;
+    // If its not the original matrix, the index must be adjusted to account for the piv(x,y) numbers
+    // Assign a dictionary entry with the MathJax id number as a key, and the (m,n) coordinates of the entry as an array
+    // Uses a little math to calculate (m,n) matrix indices, and stores it as an array value in a dictionary, with the MathJax id as the key
+    if (outMatrix.id != "orig-matrix") {
+        for (i = 2; i < entries.length; i++) {
+            var id = entries[i].id.split("-")[2]; // Get MathJaxID
+            indices[id] = [(i-2) % numRows + 1, Math.ceil((i-1) / numRows)]; // Create dictionary entry
+            entries[i].on("click", pivotOnClick); // Set onclick for each value
+        }
+    } else {
+        for (i = 0; i < entries.length; i++) {
+            var id = entries[i].id.split("-")[2]; // Get MathJaxID
+            indices[id] = [(i % numRows + 1), Math.ceil((i + 1) / numRows)]; // Create dictionary entry
+            entries[i].on("click", pivotOnClick); // Set onclick for each value
+        }
+    }
+}
 
+// Called during rowOpInput function and the part of undo function that doesn't have a call to rowOpInput
+function unclickablePivots() {
+    // This sections grabs the current matrix and stores its name and elements
+    var outCount = document.getElementById("output").childElementCount;
+    var outMatrix = document.getElementById("output").children[outCount - 2];
+    var entries = outMatrix.getElementsByClassName("mn");
 
+    // If its not the original matrix, the index must be adjusted to account for the piv(x,y) numbers
+    if (outMatrix.id != "orig-matrix") {
+        for (i = 2; i < entries.length; i++) {
+            entries[i].on("click", function () { }); // Set onclick to nothing
+        }
+
+    } else {
+        for (i = 0; i < entries.length; i++) {
+            entries[i].on("click", function () { }); // Set onclick to nothing
+        }
+    }
+}
+
+function pivotOnClick() {
+    // Reset last clicked to white
+    if (lastClicked != null) lastClicked.style.backgroundColor = "white";
+
+    // Get the m,n indices from the dictionary for this MathJax ID
+    var pivIndices = indices[this.id.split("-")[2]];
+    var piv = "piv(" + pivIndices[0] + "," + pivIndices[1] + ")";
+
+    // Set clicked element to green, set new lastClicked
+    this.style.backgroundColor = "lightgreen";
+    lastClicked = this;
+
+    // Put the piv string in the row input box and focus it
+    $j("#input-box").val(piv).focus();
+}
