@@ -4,3 +4,11 @@ table#output-table {width: 100%;}
 
 .lcol {width: 75%;}
 .rcol {width: 25%; text-align: right;}
+
+.pivotable {
+    cursor: pointer;
+}
+
+[lastClicked] {
+    background-color: lightgreen;
+}

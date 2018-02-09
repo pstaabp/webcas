@@ -5,10 +5,6 @@ var rowOperationStr = new Array(0);
 var settings = null;
 var $j = jQuery.noConflict();
 
-var entries = new Array(0); // Stores the mn class elements of the MathJax typeset matrix
-var indices = {}; // Key : MathJaxId, Value: location in matrix as [m,n]
-var lastClicked; // Holds last clicked element, for changing background color
-
 // Run the following code upon loading the document.
 
 $j(document).ready(function() 
@@ -165,7 +161,7 @@ function rowOpInput()
     $j("#LaTeX-button").click(function() {showLaTeXcode();});
     $j("#addRow-button").click(function () { addRowToTableau(); });
     $j("#piv-button").click(clickablePivots);
-    unclickablePivots();
+    if ($j("#output").children().length > 2) unclickablePivots();
     $j("#input-box").focus();
 
 }
@@ -293,10 +289,7 @@ function undo(obj)
         step = new Array(0);
         rowOperation = new Array(0);  
         rowOperationStr = new Array(0);
-        unclickablePivots();
-        $j("#matrix-entry").focus();
-
-        
+        $j("#matrix-entry").focus();     
     }
     else
     {
@@ -312,71 +305,58 @@ function undo(obj)
 	// Add another row Operation Input box.
         rowOpInput();
 	
-	// Add the last row operation to the string.  
-        $j(".input-box").val(rowOperationStr.pop());
+	// Add the last row operation to the string.  Changed to blur, add string, and then refocus or it wasn't working
+        $j("#input-box").blur().val(rowOperationStr.pop()).focus();
     }
     
     
 }
 
-// Called after piv-button is clicked, makes the elements of the currently typeset matrix clickable
+
+// Called after piv-button is clicked, makes the elements of the currently typeset matrix clickable.  
+// In addition, hovering an element will give a different cursor and background color.
 function clickablePivots() {
     // This sections grabs the current matrix and stores its name and elements
-    var outCount = document.getElementById("output").childElementCount;
-    var outMatrix = document.getElementById("output").children[outCount - 2];
-    var entries = outMatrix.getElementsByClassName("mn");
-    indices = {}; // Clear the global array of indices
+    var newMatrixId = $j("#output").children().eq(-2)[0].id;
+    var entries = $j("#"+newMatrixId+" .mn");
     var numRows = matrices[matrices.length - 1].arr.length;
-    // If its not the original matrix, the index must be adjusted to account for the piv(x,y) numbers
-    // Assign a dictionary entry with the MathJax id number as a key, and the (m,n) coordinates of the entry as an array
+    var index = 0;
+    
+    // Assign an index attribute as the (m,n) coordinates of the entry as a string
     // Uses a little math to calculate (m,n) matrix indices, and stores it as an array value in a dictionary, with the MathJax id as the key
-    if (outMatrix.id != "orig-matrix") {
-        for (i = 2; i < entries.length; i++) {
-            var id = entries[i].id.split("-")[2]; // Get MathJaxID
-            indices[id] = [(i-2) % numRows + 1, Math.ceil((i-1) / numRows)]; // Create dictionary entry
-            entries[i].on("click", pivotOnClick); // Set onclick for each value
-        }
-    } else {
-        for (i = 0; i < entries.length; i++) {
-            var id = entries[i].id.split("-")[2]; // Get MathJaxID
-            indices[id] = [(i % numRows + 1), Math.ceil((i + 1) / numRows)]; // Create dictionary entry
-            entries[i].on("click", pivotOnClick); // Set onclick for each value
-        }
-    }
+    // If its not the original matrix, then slice the piv(x,y) numbers out
+    if (newMatrixId != "orig-matrix") entries = entries.slice(2);
+
+    entries.each(function () {
+        $j(this).attr("index", (index) % numRows + 1 + "," + Math.ceil((index + 1) / numRows)); // Create index attribute as "m,n"
+        this.on("click", pivotOnClick); // Set onclick
+        index++;
+    }).attr("class", "mn pivotable").hover(function () { $j(this).css("background-color", "Aqua") }, function () { $j(this).css("background-color", "") }); // Set pivotable class for highlighting
 }
 
-// Called during rowOpInput function and the part of undo function that doesn't have a call to rowOpInput
+
+// Called during rowOpInput() to make the previous matrix unclickable
 function unclickablePivots() {
     // This sections grabs the current matrix and stores its name and elements
-    var outCount = document.getElementById("output").childElementCount;
-    var outMatrix = document.getElementById("output").children[outCount - 2];
-    var entries = outMatrix.getElementsByClassName("mn");
+    var oldMatrixId = $j("#output").children().eq(-3)[0].id;
+    var entries = $j("#" + oldMatrixId + " .mn");
 
-    // If its not the original matrix, the index must be adjusted to account for the piv(x,y) numbers
-    if (outMatrix.id != "orig-matrix") {
-        for (i = 2; i < entries.length; i++) {
-            entries[i].on("click", function () { }); // Set onclick to nothing
-        }
+    // If its not the original matrix, slice the piv(x,y) numbers
+    if (oldMatrixId != "orig-matrix") entries = entries.slice(2);
 
-    } else {
-        for (i = 0; i < entries.length; i++) {
-            entries[i].on("click", function () { }); // Set onclick to nothing
-        }
-    }
+    // Remove onclick, revert class to mn, unbind hover, restore white background since mouseleave won't do it anymore
+    entries.each(function () { $j(this).off("click", pivotOnClick).unbind("mouseenter mouseleave"); }).attr("class", "mn").css("background-color","");
 }
 
+// Sets the clicked element to green, and pivots on it
 function pivotOnClick() {
-    // Reset last clicked to white
-    if (lastClicked != null) lastClicked.style.backgroundColor = "white";
-
-    // Get the m,n indices from the dictionary for this MathJax ID
-    var pivIndices = indices[this.id.split("-")[2]];
-    var piv = "piv(" + pivIndices[0] + "," + pivIndices[1] + ")";
+    // Remove last clicked attribute (reset last pivot to white)
+    $j("[lastClicked]").removeAttr("lastClicked");
 
     // Set clicked element to green, set new lastClicked
-    this.style.backgroundColor = "lightgreen";
-    lastClicked = this;
+    $j(this).attr("lastClicked",true);
 
-    // Put the piv string in the row input box and focus it
-    $j("#input-box").val(piv).focus();
+    // Put the piv string in the row input box and then parse the operation
+    $j("#input-box").val("piv("+$j(this).attr("index")+")");
+    parseRowOp();
 }
