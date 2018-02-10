@@ -293,6 +293,8 @@ function Rational(top,bottom)
 Rational.prototype.toString = function() { return ""+this.top + "/" + this.bottom; }
 Rational.prototype.toLaTeX = function() { if (this.top>0) {return "\\frac{"+this.top+"}{"+this.bottom+"}";} else {return "-\\frac{"+(-1*this.top)+"}{"+this.bottom+"}";} } 
 Rational.prototype.toDouble = function () { return (1.0*this.top)/this.bottom;}
+Rational.prototype.abs = function () { return new Rational(Math.abs(this.top), Math.abs(this.bottom)); }
+
 /*Rational.prototype.toMathML = function() 
 { 
  if (this.top<0)

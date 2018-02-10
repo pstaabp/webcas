@@ -3,7 +3,7 @@ var step = new Array(0);
 var rowOperation = new Array(0);  // this will store the internal object version of the row operation
 var rowOperationStr = new Array(0);
 var settings = null;
-var $j = jQuery.noConflict();    
+var $j = jQuery.noConflict();
 
 // Run the following code upon loading the document.
 
@@ -12,7 +12,7 @@ $j(document).ready(function()
 	step[0]=0;
               
         $j("#settings").css("display","none");
-        $j("#clear-matrix-button").click(function () { $j("#matrix-entry").val('');} ); 
+        $j("#clear-matrix-button").click(function () { $j("#matrix-entry").val('').focus();} ); 
         $j("#store-matrix-button").click(function () { storeMatrix();} ); 
         $j("#restart-button").click(function () { restart();} ); 
       	$j("#set-link").click(function() {$j("#settings").show("blind",null,"normal",null); return false;});
@@ -22,7 +22,7 @@ $j(document).ready(function()
 	
 	if (!('localStorage' in window && window['localStorage'] !== null) || (localStorage.getItem("GEset")==null) ){
     settings = {simplexMode: false, vertLine: false, horizLine: false, slackLine: "none", 
-                firstColLine: false, addRow: false, showLaTeX: false};	    
+                firstColLine: false, addRow: false, showLaTeX: false, pivButton: false};	    
 	} else	{
 	    settings = JSON.parse(localStorage.getItem("GEset"));
       $j("#simplexMode").attr("checked",settings.simplexMode);
@@ -39,6 +39,7 @@ $j(document).ready(function()
 	    $j("#firstColLine").attr("checked",settings.firstColLine);
 	    $j("#addRow").attr("checked",settings.addRow);
 	    $j("#showLaTeX").attr("checked",settings.showLaTeX);
+        $j("#pivButton").attr("checked", settings.pivButton);
 	    
 	}
 	
@@ -54,7 +55,8 @@ $j(document).ready(function()
 		$j("#numSlackVars").attr("disabled",false);
 		settings["slackLine"]=$j("#numSlackVars").val();
 		}
-	    localStorage.setItem("GEset",JSON.stringify(settings));});
+        localStorage.setItem("GEset", JSON.stringify(settings));});
+    $j("#matrix-entry").focus();
     });
 	
 	
@@ -69,6 +71,7 @@ function restart()
     $j("#matrix-entry").val(matrices[0].toString().gsub('<br/>',"\n").gsub(","," "));
     step = [0];
     matrices = [];
+    $j("#matrix-entry").focus();
 }
 
 
@@ -80,8 +83,14 @@ function storeMatrix()
 {
     
     try {
-        matrices[0] = new Matrix($j("#matrix-entry").val().replace(/\n/g,";").replace(/;*$/,""));
-    } catch(err) { alert(err); return;}
+        // If the matrix has a \hline in it, turn on the appropriate button
+        if ((/\hline/).test($j("#matrix-entry").val())) {
+            settings.horizLine = true;
+            $j("#horizLine").attr("checked", settings.horizLine);
+        }
+        
+        matrices[0] = new Matrix($j("#matrix-entry").val());
+    } catch (err) { alert(err); return; }
     
     var convertToRational = false; 
     
@@ -98,8 +107,8 @@ function storeMatrix()
     $j("#output").append("<div id='orig-matrix'> \\[" + decorateMatrix(matrices[0]) + "\\] </div>");
     $j("#matrix-div").css("display","none");
     rowOpInput();
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"orig-matrix"]);
-    
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, "orig-matrix"]);
+
 }
 
 function decorateMatrix(m)
@@ -142,19 +151,20 @@ function rowOpInput()
         "<button id='enter-button'>Enter</button>" + 
         " <button id='undo-button'>Undo</button>";
     if(settings.showLaTeX){str += "<button id='LaTeX-button'>Show LaTeX</button>"; }
-    if(settings.addRow){str += "<button id='addRow-button'>Add Row/Col to Tableau</button>"; }
-    str+= "</div>";
+    if (settings.addRow) { str += "<button id='addRow-button'>Add Row/Col to Tableau</button>"; }
+    if (settings.pivButton) { str += "<button id='pivButton'>Select Pivot</button>"; }
+    str += "</div>";
 
     $j("#output").append(str);    
     $j("#input-box").keypress(function (e) {if (e.keyCode == 13) parseRowOp();});
     $j("#enter-button").click(function () { parseRowOp();});
     $j("#undo-button").click(function () { undo();});
     $j("#LaTeX-button").click(function() {showLaTeXcode();});
-    $j("#addRow-button").click(function() {addRowToTableau();});
- 	
-    
-    
-    
+    $j("#addRow-button").click(function () { addRowToTableau(); });
+    $j("#pivButton").click(clickablePivots);
+    if ($j("#output").children().length > 2) unclickablePivots();
+    $j("#input-box").focus();
+
 }
 
 function addRowToTableau()
@@ -239,7 +249,7 @@ function parseRowOp()
     rowOp.each(function(r){
         matrices.push(matrices.last().operate(r));;
         rowOperation.push(r);});
-    } catch (er) {alert(er); return; }
+    } catch (er) { alert(er); rowOperationStr.pop(); return; }
     
     step.push(step.last()+rowOp.length);
      
@@ -261,7 +271,6 @@ function parseRowOp()
      MathJax.Hub.Queue(["Typeset",MathJax.Hub,"out-" + (step.last())]);
      
      rowOpInput();
-     
      // scroll to the bottom after entering in the input.  
      window.scroll(0,document.body.clientHeight);
     
@@ -281,8 +290,7 @@ function undo(obj)
         step = new Array(0);
         rowOperation = new Array(0);  
         rowOperationStr = new Array(0);
-
-        
+        $j("#matrix-entry").focus();     
     }
     else
     {
@@ -298,12 +306,58 @@ function undo(obj)
 	// Add another row Operation Input box.
         rowOpInput();
 	
-	// Add the last row operation to the string.  
-        $j(".input-box").val(rowOperationStr.pop());
+	// Add the last row operation to the string.  Changed to blur, add string, and then refocus or it wasn't working
+        $j("#input-box").blur().val(rowOperationStr.pop()).focus();
     }
     
     
 }
 
 
+// Called after piv-button is clicked, makes the elements of the currently typeset matrix clickable.  
+// In addition, hovering an element will give a different cursor and background color.
+function clickablePivots() {
+    // This sections grabs the current matrix and stores its name and elements
+    var newMatrixId = $j("#output").children().eq(-2)[0].id;
+    var entries = $j("#"+newMatrixId+" .mn");
+    var numRows = matrices[matrices.length - 1].arr.length;
+    var index = 0;
+    
+    // Assign an index attribute as the (m,n) coordinates of the entry as a string
+    // Uses a little math to calculate (m,n) matrix indices, and stores it as an array value in a dictionary, with the MathJax id as the key
+    // If its not the original matrix, then slice the piv(x,y) numbers out
+    if (newMatrixId != "orig-matrix") entries = entries.slice(2);
 
+    entries.each(function () {
+        $j(this).attr("index", (index) % numRows + 1 + "," + Math.ceil((index + 1) / numRows)); // Create index attribute as "m,n"
+        this.on("click", pivotOnClick); // Set onclick
+        index++;
+    }).addClass("pivotable"); // Set pivotable class for highlighting
+}
+
+
+// Called during rowOpInput() to make the previous matrix unclickable
+function unclickablePivots() {
+    // This sections grabs the current matrix and stores its name and elements
+    var oldMatrixId = $j("#output").children().eq(-3)[0].id;
+    var entries = $j("#" + oldMatrixId + " .mn");
+
+    // If its not the original matrix, slice the piv(x,y) numbers
+    if (oldMatrixId != "orig-matrix") entries = entries.slice(2);
+
+    // Remove onclick, revert class to mn, unbind hover, restore white background since mouseleave won't do it anymore
+    entries.each(function () { $j(this).off("click", pivotOnClick); }).removeClass("pivotable");
+}
+
+// Sets the clicked element to green, and pivots on it
+function pivotOnClick() {
+    // Remove last clicked attribute (reset last pivot to white)
+    $j(".lastClicked").removeClass("lastClicked");
+
+    // Set clicked element to green, set new lastClicked
+    $j(this).addClass("lastClicked");
+
+    // Put the piv string in the row input box and then parse the operation
+    $j("#input-box").val("piv("+$j(this).attr("index")+")");
+    parseRowOp();
+}

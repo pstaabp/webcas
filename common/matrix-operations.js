@@ -5,6 +5,8 @@ function Matrix(str)
   var arr = new Array();
   if (arguments.length ==1)
   {
+    // New RegEx location, handles standard and LaTeX
+    str = str.replace(/\s*&\s*/g, " ").replace(/\\\\/g, "").replace(/\n/g, ";").replace(/;*$/, "").replace(/\\hline/g, "");
     if (/(.*);\s*$/.test(str))
     {
       str = /(.*);\s*$/.exec(str)[1];
