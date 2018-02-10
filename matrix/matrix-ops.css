@@ -9,6 +9,10 @@ table#output-table {width: 100%;}
     cursor: pointer;
 }
 
-[lastClicked] {
+.pivotable:hover{
+    background-color: aqua;
+}
+
+.lastClicked {
     background-color: lightgreen;
 }

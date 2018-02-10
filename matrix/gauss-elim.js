@@ -22,7 +22,7 @@ $j(document).ready(function()
 	
 	if (!('localStorage' in window && window['localStorage'] !== null) || (localStorage.getItem("GEset")==null) ){
     settings = {simplexMode: false, vertLine: false, horizLine: false, slackLine: "none", 
-                firstColLine: false, addRow: false, showLaTeX: false};	    
+                firstColLine: false, addRow: false, showLaTeX: false, pivButton: false};	    
 	} else	{
 	    settings = JSON.parse(localStorage.getItem("GEset"));
       $j("#simplexMode").attr("checked",settings.simplexMode);
@@ -39,6 +39,7 @@ $j(document).ready(function()
 	    $j("#firstColLine").attr("checked",settings.firstColLine);
 	    $j("#addRow").attr("checked",settings.addRow);
 	    $j("#showLaTeX").attr("checked",settings.showLaTeX);
+        $j("#pivButton").attr("checked", settings.pivButton);
 	    
 	}
 	
@@ -148,11 +149,11 @@ function rowOpInput()
 {
     var str = "<div id='row-op-input'>input: <input id='input-box' type='text' size='30'></input>" + 
         "<button id='enter-button'>Enter</button>" + 
-        " <button id='undo-button'>Undo</button>" +
-        "<button id='piv-button'>Select Pivot</button>";
+        " <button id='undo-button'>Undo</button>";
     if(settings.showLaTeX){str += "<button id='LaTeX-button'>Show LaTeX</button>"; }
-    if(settings.addRow){str += "<button id='addRow-button'>Add Row/Col to Tableau</button>"; }
-    str+= "</div>";
+    if (settings.addRow) { str += "<button id='addRow-button'>Add Row/Col to Tableau</button>"; }
+    if (settings.pivButton) { str += "<button id='pivButton'>Select Pivot</button>"; }
+    str += "</div>";
 
     $j("#output").append(str);    
     $j("#input-box").keypress(function (e) {if (e.keyCode == 13) parseRowOp();});
@@ -160,7 +161,7 @@ function rowOpInput()
     $j("#undo-button").click(function () { undo();});
     $j("#LaTeX-button").click(function() {showLaTeXcode();});
     $j("#addRow-button").click(function () { addRowToTableau(); });
-    $j("#piv-button").click(clickablePivots);
+    $j("#pivButton").click(clickablePivots);
     if ($j("#output").children().length > 2) unclickablePivots();
     $j("#input-box").focus();
 
@@ -248,7 +249,7 @@ function parseRowOp()
     rowOp.each(function(r){
         matrices.push(matrices.last().operate(r));;
         rowOperation.push(r);});
-    } catch (er) {alert(er); return; }
+    } catch (er) { alert(er); rowOperationStr.pop(); return; }
     
     step.push(step.last()+rowOp.length);
      
@@ -331,7 +332,7 @@ function clickablePivots() {
         $j(this).attr("index", (index) % numRows + 1 + "," + Math.ceil((index + 1) / numRows)); // Create index attribute as "m,n"
         this.on("click", pivotOnClick); // Set onclick
         index++;
-    }).attr("class", "mn pivotable").hover(function () { $j(this).css("background-color", "Aqua") }, function () { $j(this).css("background-color", "") }); // Set pivotable class for highlighting
+    }).addClass("pivotable"); // Set pivotable class for highlighting
 }
 
 
@@ -345,16 +346,16 @@ function unclickablePivots() {
     if (oldMatrixId != "orig-matrix") entries = entries.slice(2);
 
     // Remove onclick, revert class to mn, unbind hover, restore white background since mouseleave won't do it anymore
-    entries.each(function () { $j(this).off("click", pivotOnClick).unbind("mouseenter mouseleave"); }).attr("class", "mn").css("background-color","");
+    entries.each(function () { $j(this).off("click", pivotOnClick); }).removeClass("pivotable");
 }
 
 // Sets the clicked element to green, and pivots on it
 function pivotOnClick() {
     // Remove last clicked attribute (reset last pivot to white)
-    $j("[lastClicked]").removeAttr("lastClicked");
+    $j(".lastClicked").removeClass("lastClicked");
 
     // Set clicked element to green, set new lastClicked
-    $j(this).attr("lastClicked",true);
+    $j(this).addClass("lastClicked");
 
     // Put the piv string in the row input box and then parse the operation
     $j("#input-box").val("piv("+$j(this).attr("index")+")");
