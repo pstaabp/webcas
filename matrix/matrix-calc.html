@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-script-type" content="text/javascript">
+
+    <title>WebCAS -- Matrix Calcuator</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+
+    <style type="text/css">
+    @import "../style/webcas.css";
+    @import url("matrix-ops.css");
+    #navbar {height: 50px}
+    body {padding-top: 75px;}
+    </style>
+</head>
+
+  <body>
+    <nav id="navbar" class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="../index.html">WebCAS -- Matrix Calculator</a>
+        <!--<button class="navbar-toggler" 
+          type="button" data-bs-toggle="collapse" 
+          data-bs-target="#navbarSupportedContent" 
+          aria-controls="navbarSupportedContent" 
+          aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>-->
+        <div class="collapse navbar-collapse navbar-dark bg-dark" id="navbarSupportedContent"></div>
+          <ul class="nav nav-pills">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Switch Tools</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="gauss-elim2.html">Gaussian Eliminator</a></li>
+                <li><a class="dropdown-item" href="#">Matrix Operations</a></li>
+                <li><a class="dropdown-item" href="../least-squares/index.html">Linear Regression</a></li>
+              </ul>
+            </li>
+          </ul>
+          <form class="container-fluid justify-content-start">
+            <!-- <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#settings-modal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+                <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+              </svg>
+            </button> -->
+            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#help-modal">
+              <!-- This is a bootrap icon as SVG -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-7" id="left-output">
+          <p style="font-size: 80%; width: 500px;">To start, click the "enter a matrix" button on the right. Then type in matrix operations in the textbox below.
+            Read the help pages by clicking on the link in the upper right corner to read all
+            the operations that can be performed. </p>
+            <table id="output-table"><tbody id="tab"></tbody></table>
+        </div>
+        <div class="col-4" id="right">
+          <div class="card">
+            <div class="card-header">
+              Entered Matrices.
+              <button id="enter-matrix-button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#enter-matrix-modal">Add a new Matrix</button>
+            </div>
+            <div class="card-body">
+              <ul class="list-group list-group-flush" id="matrices">
+              </ul>
+              </div>
+
+          </div>
+        </div>
+      </div>
+  
+    <!-- <div id="matrix-input">
+      <span style="position: absolute; right: 10px;" onclick="$j('#matrix-input').hide();$j('#input-text').focus()" class="link">Close</span>
+      <p>
+     Enter a matrix name and matrix:
+    </p>
+
+      <div id="matrix-div">
+      <table><tbody><tr><td>
+        <input id="matrix-name" type="text" size="5" />= </td><td>
+      <textarea id="matrix-entry" cols="20" rows="6"></textarea></td><td>
+
+        <button id="store-matrix-button">Store</button><br/>
+        <button id="clear-matrix-button">Clear</button>
+        </td></tr></tbody></table>
+      </div>
+
+    </div> -->
+
+
+    <div class="modal" id="enter-matrix-modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Enter a Matrix</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <table><tbody><tr><td>
+              <input id="matrix-name" type="text" size="5" />= </td><td>
+            <textarea id="matrix-entry" cols="20" rows="6"></textarea></td><td>
+              </td></tr></tbody></table>
+          </div>
+          <div class="modal-footer">
+            <button id="save-matrix-button" type="button" class="btn btn-primary">Save Matrix</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>    
+    </div>
+
+
+    <div id="help-modal" class="modal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Help for the Matrix Calculator</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+        <h4>Overview</h4>
+        <p>This page provides basic operations on matrices including addition, subtraction, mutiplication and powers.  Determinants are also available.  </p>
+
+        <h4>Basic Input</h4>
+        <p>In order to start, enter a matrix by clicking on the button "Enter a matrix" on the right side of the page.  Type in a name for the matrix in the first box, and the matrix in the second (larger) box.  Type each element of the matrix separated by spaces and each row of the matrix should be on a separate line. For example, the matrix:
+        \[ \left[\begin{array}{rrr} 1 & 2 & 3 \\ 4 & 5 & 6 \\7 & 8 & 9 \end{array} \right] \]
+
+        </p>
+        <p>Should be entered like:</p>
+<pre>
+  1 2 3
+  4 5 6
+  7 8 9
+ </pre>
+
+        <p>Once entered, the matrix will appear in the right column.  These are the matrices available for use.  </p>
+
+        <p>A column vector should be entered as a single entry per line.   For example, the column vector
+        \[ \left[\begin{array}{r} 1\\ 2  \\3  \end{array} \right]\]
+        </p>
+        <p>Should be entered like:</p>
+<pre>
+  1
+  2
+  3
+  </pre>
+
+        <p>Matrices may contain fractional entries.  To include a fraction enter it with the "/".  For example 1/2 should be entered as "1/2".  </p>
+
+
+        <p>The operations of addition, subtraction and multiplication are performed with two matrices and use the symbols: +, -, * respectively.  For example, suppose that two matrices called "A" and "B" have been entered.  Then "A*B" will return the product.  </p>
+
+        <p>Scalar multiplication of numbers is also defined. Entering <tt>2*A</tt> returns a matrix in which each element of <tt>A</tt> is mutiplied by two.</p>
+
+        <p><b>Note:</b>Although it is common to leave out the multiplication sign * when writing matrix operations, like <tt>AB</tt>, you must explicitly put in the multiplication sign.  </p>
+
+        <h4>Determinant and inverse</h4>
+
+        <p>The determinant can be found using the function <tt>det</tt>.  If <tt>A</tt> is a square matrix, then <tt>det(A)</tt> will return its determinant. Note:  the matrix must be square or an error will be generated. </p>
+
+        <p>The inverse can be found using the function <tt>inv</tt>.  If <tt>A</tt> is a square matrix, then <tt>inv(A)</tt> will return its inverse, if it exists.  If not, an error will be shown.  An error will also be generated if the matrix is not square.  </p>
+
+        <h4>Gauss-Jordon Elimination</h4>
+
+        <p>Gauss-Jordon Elimination or row reduction take a matrix and returns a matrix in reduced row echelon form.  A matrix is in row echelon form if the leading element in each row (the leading element in a row is the left-most non-zero element) has zeros both below it and to its right.   A reduce row echelon form also requires that a leading element is a 1 and it is the only non zero element in its column.  </p>
+
+        <p>To perform row reduction on a matrix A, type <tt>rowreduce(A)</tt>.</p>
+
+        <h4>Errors and Troubleshooting</h4>
+
+        <p>A number of error can occur while using this page.  All errors will give a pop up window indicating what is wrong.  Here is a list of most possible errors:               </p>
+
+        <ul>
+        <li><b>Matrix Error:</b>  a matrix must have the same number of elements on each row.  If not an error is thrown.</li>
+        <li><b>Parsing Error:</b> if one of the elements in the matrix does not parse to a constant, an error will be thrown.  (Note: currently, you cannot put constants pi or e in the matrix, but plans are to allow them).</li>
+        <li><b>Compatibility error:</b> Depending on the operation, the two matrices must be compatiable:
+        <ul>
+        <li>For subtraction or addition, the two matrices must be the same size.</li>
+        <li>For multiplication, the number of columns of the first, must equal the number of columms of the second. </li>
+        <li>For power, the matrix must be square</li>
+        <li>For the determinant, the matrix must be square</li>
+        </ul>
+        </li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript" src="../common/prototype.js">  </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script type="text/javascript" src="../common/functions.js"></script>
+<script type="text/javascript" src="../common/constants.js"></script>
+<script type="text/javascript" src="../common/matrix-operations.js"></script>
+
+<!--<link type="text/css" href="../style/jquery-ui-dialog.css" rel="Stylesheet" />
+<script type="text/javascript" src="../common/jquery-ui-dialog.min.js"></script> -->
+
+<script type="text/javascript" src="../common/constants.js"></script>
+<script type="text/javascript" src="matrix-calc.js"></script>
+
+</html>

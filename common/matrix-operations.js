@@ -328,6 +328,18 @@ Matrix.prototype.clone = function()
   return m;
 }
 
+/* This is the transpose of the matrix */
+Matrix.prototype.transpose = function()
+{
+  var m = new Matrix(this.arr[0].length,this.arr.length);
+  for(i=0; i < m.arr.length; i++)
+    for(j=0; j< m.arr[i].length; j++)
+      m.arr[i][j] = this.arr[j][i];
+  
+  return m;
+}
+
+
 /* This checks for equality of the dimensions */
 
 Matrix.prototype.equalDimensions = function(B)
@@ -335,6 +347,22 @@ Matrix.prototype.equalDimensions = function(B)
   return ((this.arr.length==B.arr.length) && (this.arr[0].length == B.arr[0].length));
 }
 
+/* This produces an augmented matrix */
+
+Matrix.prototype.augment = function(B)
+{
+  if (this.arr.length != B.arr.length) {
+    throw "The number of rows of the two matrices must be equal";
+  }
+  var m = new Matrix(this.arr.length,this.arr[0].length + B.arr[0].length); 
+  for(i=0; i < this.arr.length; i++) {
+    for(j=0; j< this.arr[i].length; j++)
+      m.arr[i][j] = this.arr[i][j];
+    for(j=0; j<B.arr[0].length; j++)
+      m.arr[i][this.arr[0].length + j] = B.arr[i][j];
+  }
+  return m; 
+}
 /* This adds the current matrix to B and return the result */
 
 Matrix.prototype.plus = function (B)
