@@ -128,7 +128,7 @@
           </div>
           <div class="modal-body">
         <h4>Overview</h4>
-        <p>This page provides basic operations on matrices including addition, subtraction, mutiplication and powers.  Determinants are also available.  </p>
+        <p>This page provides basic operations on matrices including addition, subtraction, mutiplication and powers as well as determinant and inverses.  </p>
 
         <h4>Basic Input</h4>
         <p>In order to start, enter a matrix by clicking on the button "Enter a matrix" on the right side of the page.  Type in a name for the matrix in the first box, and the matrix in the second (larger) box.  Type each element of the matrix separated by spaces and each row of the matrix should be on a separate line. For example, the matrix:
@@ -154,26 +154,66 @@
   3
   </pre>
 
-        <p>Matrices may contain fractional entries.  To include a fraction enter it with the "/".  For example 1/2 should be entered as "1/2".  </p>
+        <p>Matrices may contain fractional entries.  To include a fraction enter it with the "/".  
+          For example 1/2 should be entered as "1/2".  </p>
 
 
-        <p>The operations of addition, subtraction and multiplication are performed with two matrices and use the symbols: +, -, * respectively.  For example, suppose that two matrices called "A" and "B" have been entered.  Then "A*B" will return the product.  </p>
+        <p>The operations of addition, subtraction and multiplication are performed with two matrices 
+          and use the symbols: +, -, * respectively.  For example, suppose that two matrices called 
+          "A" and "B" have been entered.  Then "A*B" will return the product.  </p>
 
-        <p>Scalar multiplication of numbers is also defined. Entering <tt>2*A</tt> returns a matrix in which each element of <tt>A</tt> is mutiplied by two.</p>
+        <p>Scalar multiplication of numbers is also defined. Entering <tt>2*A</tt> returns a matrix 
+          in which each element of <tt>A</tt> is mutiplied by two.</p>
 
-        <p><b>Note:</b>Although it is common to leave out the multiplication sign * when writing matrix operations, like <tt>AB</tt>, you must explicitly put in the multiplication sign.  </p>
+        <p><b>Note:</b>Although it is common to leave out the multiplication sign * when writing 
+          matrix operations, like <tt>AB</tt>, you must explicitly put in the multiplication sign.  </p>
 
-        <h4>Determinant and inverse</h4>
+        <p>The square of a matrix is defined as the matrix times itself. Other powers are similarly 
+          defined.  You can find the cube of a square matrix "A", entering <tt>A^3</tt>.</p>
 
-        <p>The determinant can be found using the function <tt>det</tt>.  If <tt>A</tt> is a square matrix, then <tt>det(A)</tt> will return its determinant. Note:  the matrix must be square or an error will be generated. </p>
+        <h4>Using other matrices</h4>
+        <p>As you enter operations on  matrices, you will see a line number produced to the right of
+          each output.  You can use this.  For example if you see
+          \[
+          B-C = \left[\begin{array}{rr} 4 & -2 \\ -1 & 4 \\ 0 & 0 \end{array}\right] \qquad\qquad[1]
+          \]
+          then you can do another operation using [1].  If you have a compatible matrix \(A\), then 
+          <tt>A*[1]</tt> will produce something like:
+          \[
+          A(B-C) = \left[\begin{array}{rr} 2&6 \\ 11 & 12 \\ 30 & -8 \end{array}\right] \qquad\qquad[2]
+          \]
 
-        <p>The inverse can be found using the function <tt>inv</tt>.  If <tt>A</tt> is a square matrix, then <tt>inv(A)</tt> will return its inverse, if it exists.  If not, an error will be shown.  An error will also be generated if the matrix is not square.  </p>
+        </p>
+
+        <h4>Other matrix functions</h4>
+
+        <p>The determinant can be found using the function <tt>det</tt>.  If <tt>A</tt> is a square 
+          matrix, then <tt>det(A)</tt> will return its determinant. Note:  the matrix must be square 
+          or an error will be generated. </p>
+
+        <p>The inverse can be found using the function <tt>inv</tt>.  If <tt>A</tt> is a square matrix, 
+          then <tt>inv(A)</tt> will return its inverse, if it exists.  If not, an error will be shown.  
+          An error will also be generated if the matrix is not square.  </p>
+
+        <p>You can create a new matrix by augmenting (concatenating) two matrices with the same number 
+          of rows. If "A" and "B" are the matrix, entering <tt>aug(A,B)</tt> will return the augmented
+          matrix.
+        </p>
+
+        <p>
+          You can produce an \(n \times n\) identity matrix with <tt>I(n)</tt>.  For example, a 
+          \(4 \times 4\) identity matrix is <tt>I(4)</tt>
+        </p>
 
         <h4>Gauss-Jordon Elimination</h4>
 
-        <p>Gauss-Jordon Elimination or row reduction take a matrix and returns a matrix in reduced row echelon form.  A matrix is in row echelon form if the leading element in each row (the leading element in a row is the left-most non-zero element) has zeros both below it and to its right.   A reduce row echelon form also requires that a leading element is a 1 and it is the only non zero element in its column.  </p>
+        <p>Gauss-Jordon Elimination or row reduction take a matrix and returns a matrix in reduced 
+          row echelon form.  A matrix is in row echelon form if the leading element in each row 
+          (the leading element in a row is the left-most non-zero element) has zeros both below it 
+          and to its right.   A reduce row echelon form also requires that a leading element is a 1 
+          and it is the only non zero element in its column.  </p>
 
-        <p>To perform row reduction on a matrix A, type <tt>rowreduce(A)</tt>.</p>
+        <p>To perform row reduction on a matrix A, type <tt>rref(A)</tt>.</p>
 
         <h4>Errors and Troubleshooting</h4>
 
