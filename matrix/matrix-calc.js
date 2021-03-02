@@ -80,7 +80,7 @@ function updateMatrices()
       var key = storage.keys()[i];
       var m = storage.get(key);
       var str ="<li class='list-group-item' id='matrix-" + (i) + "'>";
-      str += "<table><tr><td rowspan='2'>\\( " + key +"=" + (m.toLaTeX()) + " \\)</td>";
+      str += "<table><tr><td rowspan='2'>\\( " + decorateVariable(key) +"=" + (m.toLaTeX()) + " \\)</td>";
       str += "<td><button class='btn btn-small btn-outline-dark edit-matrix' data-matrix='" + (i) +"'>" + pencil + "</button></td></tr>";
       str += "<tr><td><button class='btn btn-small btn-outline-dark delete-matrix' data-matrix='" + (i) +"'>" +trashcan+ " </button></td></tr></table></li>";
 
@@ -94,6 +94,11 @@ function updateMatrices()
    $j("#input-text").focus();
 
 
+}
+
+function decorateVariable(variable){
+   let var_re = /([a-zA-Z])(\d)/g;
+   return variable.replace(var_re, "$1_$2"); 
 }
 
 
@@ -119,11 +124,11 @@ var binary_opers = ["aug"];
 
 var unaryRE = /(\w+)\(([\w\[\]]+)\)/;
 var binaryRE = /(\w+)\(([\w\[\]]+),([\w\[\]]+)\)/;
-var matOpRE = /(\[\d+\]|\w+|-?\d+|\(-?\d+\/\d+\))([\+\-\*\^])(\[\d+\]|\w+|\d+)/
+var matOpRE = /^(\[\d+\]|\w+|-?\d+|\(-?\d+\/\d+\))([\+\-\*\^])(\[\d+\]|\w+|\d+)$/
 
 /* this gets the matrix that is either stored as a variable name 
   or as [\d] */
-  function getMatrix(str) {
+function getMatrix(str) {
    var brackets=/\[(\d+)\]/;
    var m = storage.get(str);
    var br = brackets.exec(str);
@@ -132,7 +137,7 @@ var matOpRE = /(\[\d+\]|\w+|-?\d+|\(-?\d+\/\d+\))([\+\-\*\^])(\[\d+\]|\w+|\d+)/
    } else if (br) {
       var i = parseInt(br[1]);
       if (i>=0 && i<= results.length) {
-         return {matrix: results[i-1].matrix, expr: results[i-1].expr};
+         return {matrix: results[i-1].matrix, expr: "("+results[i-1].expr + ")"};
       } else {
          throw "The equation " + str + " is not defined.";
       }
@@ -193,7 +198,7 @@ function matrixOperation(oper,var1,var2) {
       mat1 = getMatrix(var1).matrix;
       expr1 = getMatrix(var1).expr;
       var res = mat1.transpose();
-      return {matrix: res , expr: "("+expr1+")^T"}; //as_string: "\\[" + var1 + "^T=" + (res.toLaTeX()) + "\\]"};
+      return {matrix: res , expr: "("+expr1+")^T"}; 
    }
 
    try {
@@ -206,21 +211,17 @@ function matrixOperation(oper,var1,var2) {
    
    switch(oper){
       case "+":
-         var res = mat1.plus(mat2);
-         return {matrix: res , expr: expr1 + "+" + expr2 }; //as_string: "\\[" + var1 + "+" + var2 + "=" + (res.toLaTeX()) + "\\]"};
+         return {matrix: mat1.plus(mat2) , expr: expr1 + "+" + expr2 }; 
       case "-":
-         var res = mat1.minus(mat2)
-         return {matrix: res , expr : expr1 + "-" + expr2}; //as_string: "\\[" + var1 + "-" + var2 + "=" + (res.toLaTeX()) + "\\]"};
+         return {matrix: mat1.minus(mat2) , expr : expr1 + "-" + expr2}; 
       case "*":
-        var res = num1_scalar ? mat2.times(num1) : mat1.times(mat2);  
-        return {matrix: res , expr : expr1 + "\\;" + expr2}; // as_string: "\\[" + var1 + "\\;" + var2 + "=" + (res.toLaTeX()) + "\\]"};
+         return num1_scalar ?  {matrix: mat2.times(num1), expr: num1 + "\\," + expr2} :  {matrix: mat1.times(mat2), expr: expr1 + "\\," + expr2}
       case "^":
         var pow = parseInt(var2);
         if(isNaN(pow)) {
           throw var2 + " is not an integer";
         }
-        var res = mat1.power(pow);
-        return {matrix: res , expr: expr1 + "^" + pow}; //as_string: "\\[" + var1 + "^" + var2 + "=" + (res.toLaTeX()) + "\\]"};
+        return {matrix: mat1.power(pow) , expr: expr1 + "^" + pow}; 
    }
 }
 
@@ -263,10 +264,10 @@ function parseInput(str)
       } else  {
          throw "I don't understand the operation: " + str; 
       }
-         
+
       results[results.length] = {matrix: output.matrix, expr: output.expr};
       var tableRow = "<tr><td class='lcol'>" + 
-         "\\[ " + output.expr + "=" + output.matrix.toLaTeX() + "\\]</td><td class='rcol'> ["+ currentStep + "] </td></tr>";
+         "\\[ " + decorateVariable(output.expr) + "=" + output.matrix.toLaTeX() + "\\]</td><td class='rcol'> ["+ currentStep + "] </td></tr>";
       currentStep++;
 
       $j("#tab").append(tableRow);
@@ -295,7 +296,7 @@ function deleteMatrix() {
    console.log("deleting....")
    var num = $j(this).data("matrix");
    var varname = storage.keys()[num];
-   localStorage.removeItem("matrix-"+varname);
+   localStorage.removeItem(`matrix-${varname}`);
    storage.unset(varname);
    updateMatrices();
 }
