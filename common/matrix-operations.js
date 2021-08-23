@@ -23,13 +23,13 @@ function Matrix(str)
       }
       arr[i] = row;
     }
-    
+
     for(var i = 1; i < arr.length; i++)
       if (arr[0].length != arr[i].length)
       throw "Error in constructing matrix.  Each row must be the same length.";
-    
-    
-    
+
+
+
   }
   if (arguments.length==2)
   {
@@ -40,7 +40,7 @@ function Matrix(str)
       for(var i=0; i< arr[0].length; i++)
         arr[j][i] = new Integer(0);
     }
-    
+
   }
   this.arr = arr;
 }
@@ -58,7 +58,7 @@ Matrix.prototype.toString = function ()
   {
     str += this.arr[j] + "<br/>";
   }
-  
+
   return str;
 }
 
@@ -71,7 +71,7 @@ Matrix.prototype.toPlainText = function ()
       str += this.arr[j][i] + " ";
     str +="\n";
   }
-  
+
   return str;
 }
 
@@ -83,13 +83,13 @@ Matrix.prototype.toLaTeX = function ()
   var str = "\\left[\\begin{array}{";
   for(var j = 0; j<n; j++) {str += "r";}
   str += "}\n"
- 
+
   for (var j = 0; j < m; j++)
   {
     for(var i = 0; i < n; i++)
     {
       str += (this.arr[j][i].toString()+"").replace("(","").replace(")","");
-      
+
       if (i!= n-1)  str += " & ";}
     str += "\\\\";
 
@@ -97,7 +97,7 @@ Matrix.prototype.toLaTeX = function ()
   }
 
   str += "\\end{array} \\right] \n";
- 
+
  return str;
 }
 
@@ -115,7 +115,7 @@ Matrix.prototype.isDecimal = function ()
       }
     }
   }
-  return false; 
+  return false;
 }
 
 // This method converts all the decimal entries to integers or rationals and returns that matrix.
@@ -123,18 +123,18 @@ Matrix.prototype.isDecimal = function ()
 Matrix.prototype.toRational = function()
 {
   var mat = this.clone();
-   
+
   var m = this.arr.length;
   var n = this.arr[0].length;
   for(var j = 0; j< m; j++){
     for(var i = 0; i< n; i++){
-     if(!((mat.arr[j][i] instanceof Integer) || (mat.arr[j][i] instanceof Rational)))    
+     if(!((mat.arr[j][i] instanceof Integer) || (mat.arr[j][i] instanceof Rational)))
       {
           mat.arr[j][i]=this.arr[j][i].toRational();
       }
     }
   }
-  return mat; 
+  return mat;
 }
 
 /* This matrix converts all of the entries that are Rationals to Decimals */
@@ -142,7 +142,7 @@ Matrix.prototype.toRational = function()
 Matrix.prototype.toDecimal = function()
 {
  var mat = this.clone();
-   
+
   var m = this.arr.length;
   var n = this.arr[0].length;
   for(var j = 0; j< m; j++){
@@ -153,7 +153,7 @@ Matrix.prototype.toDecimal = function()
       }
     }
   }
-  return mat; 
+  return mat;
 }
 
 
@@ -168,12 +168,12 @@ Matrix.prototype.operate = function (rowOp)
   } else if (rowOp instanceof RowMultiply)
   {
     return this.multiplyRowBy(rowOp.row-1,rowOp.factor);
-    
+
   } else if (rowOp instanceof RowMultiplyAndAdd)
   {
     if (!((rowOp.row1==rowOp.row3)||(rowOp.row2==rowOp.row3)))
       throw "illegal row input row cannot equal " + rowOp.row3;
-    
+
       return this.multiplyRowBy(rowOp.row1-1,rowOp.factor1,rowOp.row2-1,
         rowOp.factor2,rowOp.row3-1);
   } else if (rowOp instanceof Pivot)
@@ -181,13 +181,13 @@ Matrix.prototype.operate = function (rowOp)
     if (this.arr[rowOp.row-1][rowOp.col-1].equals(Integer.ZERO))
        throw "The matrix cannot be pivoted about a 0 entry.";
     return this.pivot(rowOp.row-1,rowOp.col-1);
-    
+
   } else if (rowOp instanceof PivotPreserveIntegers)
   {
     if (this.arr[rowOp.row-1][rowOp.col-1].equals(Integer.ZERO))
        throw "The matrix cannot be pivoted about a 0 entry.";
     return this.pivotPreserveIntegers(rowOp.row-1,rowOp.col-1);
-    
+
   } else if (rowOp instanceof ToDecimal)
   {
     return this.toDecimal();
@@ -201,16 +201,16 @@ Matrix.prototype.operate = function (rowOp)
 Matrix.prototype.pivot = function (row,col)
 {
   var m = this.clone();
-  
+
   var factor = new Divide(new Integer(1),this.arr[row][col])
   m = m.multiplyRowBy(row,factor);
 
   for(var i = 0; i < this.arr.length; i++)
     if (i != row)
     m = m.multiplyRowBy(row, new Multiply(new Integer(-1),this.arr[i][col]),i,Integer.ONE);
-  
+
   return m;
-  
+
 }
 
 /* The following is a pivot about the given row and column that preserves integers
@@ -231,7 +231,7 @@ Matrix.prototype.pivotPreserveIntegers = function (row,col)
       factor1 = new Integer(-1);
     }
 
-  
+
     for(var k = 0; k < this.arr.length; k++)
       if (k != row){
         m = m.multiplyRowBy(row,new Multiply(factor1, new Divide(m.arr[k][col],this.SMMultiplier)),
@@ -247,12 +247,12 @@ Matrix.prototype.pivotPreserveIntegers = function (row,col)
   }
 
   var factor = m.arr[row][col]
-  
+
   for(var i = 0; i < this.arr.length; i++)
     if (i != row)
     {
       m = m.multiplyRowBy(row,new Multiply(new Integer(-1),this.arr[i][col]),i,factor);
-      
+
       var r = Integer.GCD(m.arr[i]);
       if (r.compareTo(Integer.ZERO)<0){r = new Multiply(r,new Integer(-1));}
       if (! (r.compareTo(Integer.ZERO)==0))
@@ -260,9 +260,9 @@ Matrix.prototype.pivotPreserveIntegers = function (row,col)
         m = m.multiplyRowBy(i,new Divide(new Integer(1),r));
       }
     }
-      
+
   return m;
-  
+
 }
 
 
@@ -277,7 +277,7 @@ Matrix.prototype.multiplyRowBy = function (row1,num1,row2,num2,row3)
     num2 = new Integer(0);
     row3 = row1;
   }
-  
+
   else if (arguments.length==3)
   {
     num2 = new Integer(1);
@@ -287,17 +287,17 @@ Matrix.prototype.multiplyRowBy = function (row1,num1,row2,num2,row3)
   {
     row3 = row2;
   }
-  
-  
+
+
   var m = this.clone();
   for(var j = 0; j < this.arr[row2].length; j++)
   {
     var tmp = new Add(new Multiply(this.arr[row1][j],num1),
       new Multiply(this.arr[row2][j],num2));
-    
+
     m.arr[row3][j] = tmp.simplify();
   }
-  
+
   return m;
 }
 
@@ -312,7 +312,7 @@ Matrix.prototype.swapRows = function(i,j)
   var row = m.arr[i];
   m.arr[i] = m.arr[j];
   m.arr[j] = row;
-  
+
   return m;
 }
 
@@ -324,7 +324,7 @@ Matrix.prototype.clone = function()
   for(i=0; i < this.arr.length; i++)
     for(j=0; j< this.arr[i].length; j++)
     m.arr[i][j] = this.arr[i][j];
-  
+
   return m;
 }
 
@@ -335,7 +335,7 @@ Matrix.prototype.transpose = function()
   for(i=0; i < m.arr.length; i++)
     for(j=0; j< m.arr[i].length; j++)
       m.arr[i][j] = this.arr[j][i];
-  
+
   return m;
 }
 
@@ -354,29 +354,29 @@ Matrix.prototype.augment = function(B)
   if (this.arr.length != B.arr.length) {
     throw "The number of rows of the two matrices must be equal";
   }
-  var m = new Matrix(this.arr.length,this.arr[0].length + B.arr[0].length); 
+  var m = new Matrix(this.arr.length,this.arr[0].length + B.arr[0].length);
   for(i=0; i < this.arr.length; i++) {
     for(j=0; j< this.arr[i].length; j++)
       m.arr[i][j] = this.arr[i][j];
     for(j=0; j<B.arr[0].length; j++)
       m.arr[i][this.arr[0].length + j] = B.arr[i][j];
   }
-  return m; 
+  return m;
 }
 /* This adds the current matrix to B and return the result */
 
 Matrix.prototype.plus = function (B)
 {
-  
+
   if (!this.equalDimensions(B))
     throw "Matrices are not the same size for addition";
-  
+
   var m = new Matrix(this.arr.length,this.arr[0].length);
-  
+
   for(var j = 0; j < this.arr.length; j++)
     for(var i = 0; i < this.arr[0].length; i++)
     m.arr[j][i] = new Add(this.arr[j][i],B.arr[j][i]);
-  
+
   return m;
 }
 
@@ -386,13 +386,13 @@ Matrix.prototype.minus = function(B)
 {
   if (!this.equalDimensions(B))
     throw "Matrices are not the same size for addition";
-  
+
   var m = new Matrix(this.arr.length,this.arr[0].length);
-  
+
   for(var j = 0; j < this.arr.length; j++)
     for(var i = 0; i < this.arr[0].length; i++)
     m.arr[j][i] = new Subtract(this.arr[j][i],B.arr[j][i]);
-  
+
   return m;
 }
 
@@ -404,51 +404,51 @@ Matrix.prototype.times = function (B)
   {
     if (this.arr[0].length != B.arr.length)
       throw "Matrices are not compatible for multiplication";
-    
+
     var m = new Matrix(this.arr.length, B.arr[0].length);
     for(var j = 0; j < this.arr.length; j++)
       for(var i = 0; i < B.arr[0].length; i++)
-      { 
+      {
         var ops = new Array();
-        for (var k = 0; k < B.arr.length; k++) 
+        for (var k = 0; k < B.arr.length; k++)
           ops[k] = new Multiply(this.arr[j][k],B.arr[k][i]);
         m.arr[j][i] = new Add(ops);
       }
-      
+
       return m;
-      
+
   } else  // scalar multiplication
   {
     var m = new Matrix(this.arr.length, this.arr[0].length);
-    
+
     for(var j = 0; j < this.arr.length; j++)
       for(var i = 0; i < this.arr[0].length; i++)
       m.arr[j][i] = new Multiply(this.arr[j][i],B);
-    
+
     return m;
   }
 }
 
 /* The following raises the matrix to an integer power.  Currently this
-uses matrix multiplication over and over.  In the future, possibly it should use 
+uses matrix multiplication over and over.  In the future, possibly it should use
 eigenvalues/vectors.
 
 */
 
 Matrix.prototype.power = function(n)
 {
-  
+
   if (n<0) throw "The matrix must be raised to a positive integer power";
-  
+
   if (! this.isSquare())
     throw "The matrix must be square in order to raise it to a power";
-  
-  
+
+
   var m = Matrix.identity(this.arr.length);
-  
+
   for(var i = 0; i < n; i++)
     m = m.times(this);
-  
+
   return m;
 }
 
@@ -458,13 +458,13 @@ Matrix.prototype.power = function(n)
 Matrix.identity = function(n)
 {
   if (n<1) throw "identity matrix must be at least a 1 by 1 matrix";
-  
+
   var m = new Matrix(n,n);
-  
+
   for(var i=0; i< n; i++)
     m.arr[i][i] = new Integer(1);
-  
-  
+
+
   return m;
 }
 
@@ -475,10 +475,10 @@ Matrix.prototype.isRational = function()
 {
   for(i=0; i < this.arr.length; i++)
     for(j=0; j< this.arr[i].length; j++)
-    if(!( (this.arr[i][j] instanceof Integer) || 
+    if(!( (this.arr[i][j] instanceof Integer) ||
       (this.arr[i][j] instanceof Rational)))
     return false;
-    
+
     return true;
 }
 
@@ -490,7 +490,7 @@ Matrix.prototype.isReal = function()
     for(j=0; j< this.arr[i].length; j++)
     if(this.arr[i][j] instanceof Real)
     return true;
-  
+
   return false;
 }
 
@@ -513,14 +513,14 @@ Matrix.prototype.rowReduce = function ()
 Matrix.prototype.rowReduceRational = function ()
 {
   var m = this.clone();
-  
-  var row = 0; 
+
+  var row = 0;
   for(var col = 0; col < m.arr[0].length; col++)
   {
     var columnOfZeros = true;
-    
+
     // Search for a non-zero entry in column col
-    
+
     if (m.arr[row][col].equals(Integer.ZERO))
     {
       for (var j=row+1;j < m.arr.length; j++)
@@ -528,13 +528,13 @@ Matrix.prototype.rowReduceRational = function ()
         if (!m.arr[j][col].equals(Integer.ZERO))
         {
           m = m.swapRows(row,j);
-          
+
           columnOfZeros = false;
           break;
         }
       }
         } else { columnOfZeros = false;}
-        
+
         if (!columnOfZeros)
         {
            // First divide the current row to get a 1 in leading position.
@@ -545,20 +545,20 @@ Matrix.prototype.rowReduceRational = function ()
             rat = new Rational(m.arr[row][col].bottom,m.arr[row][col].top);
           else if (m.arr[row][col] instanceof Complex)
             rat = new Divide(m.arr[row][col].conjugate(),new Power(m.arr[row][col].abs(),new Integer(2)));
-          m = m.multiplyRowBy(row,rat);   
+          m = m.multiplyRowBy(row,rat);
           for(var j=0;j< m.arr.length; j++)
           {
-            if (j!=row)  // eliminate to get zeros in all other positions.  
+            if (j!=row)  // eliminate to get zeros in all other positions.
                m = m.multiplyRowBy(row,new Multiply(new Integer(-1),m.arr[j][col]),j,new Integer(1));
           }
           row++;
         }
         if (row == m.arr.length) break;
   }
-  
+
   return m;
-  
-  
+
+
 }
 
 /* This is designed to simplify all elements of the matrix.  */
@@ -566,11 +566,11 @@ Matrix.prototype.rowReduceRational = function ()
 Matrix.prototype.simplify = function ()
 {
   var m = new Matrix(this.arr.length, this.arr[0].length);
-  
+
   for(var j = 0; j < this.arr.length; j++)
     for (var i = 0; i < this.arr[0].length; i++)
     m.arr[j][i] = this.arr[j][i].simplify();
-  
+
   return m;
 }
 
@@ -582,26 +582,26 @@ Matrix.prototype.isSquare = function ()
 }
 
 /*
-*  The following method finds the determinant of the matrix.  The method used 
-is Gaussian Elimination 
+*  The following method finds the determinant of the matrix.  The method used
+is Gaussian Elimination
 **/
 
 Matrix.prototype.determinant = function ()
 {
   if (! this.isSquare())
     throw "Error in taking determinant.  The matrix is not square.";
-  
+
   var det = new Integer(1);
-  
+
   var m = this.clone();
-  
-  var row = 0; 
+
+  var row = 0;
   for(var col = 0; col < m.arr[0].length; col++)
   {
     var columnOfZeros = true;
-    
+
     // Search for a non-zero entry in column col
-    
+
     if (m.arr[row][col].equals(new Integer(0)))
     {
       for (var j=row+1;j < m.arr.length; j++)
@@ -609,32 +609,32 @@ Matrix.prototype.determinant = function ()
         if (!m.arr[j][col].equals(new Integer(0)))
         {
           m = m.swapRows(row,j);
-          
+
           columnOfZeros = false;
           break;
         }
       }
         } else { columnOfZeros = false;}
-        
+
         if (!columnOfZeros)
         {
           var rat = new Divide(new Integer(1),m.arr[row][col]);
           det = new Multiply(det,m.arr[row][col]);
-          m = m.multiplyRowBy(row,rat);   
+          m = m.multiplyRowBy(row,rat);
           for(var j=row+1;j< m.arr.length; j++)
           {
-            var rat = (m.arr[j][col] instanceof Integer)? 
+            var rat = (m.arr[j][col] instanceof Integer)?
             new Integer(-m.arr[j][col].value):
             new Rational(-m.arr[j][col].top,m.arr[j][col].bottom);
             m = m.multiplyRowBy(row,rat,j,new Integer(1));
           }
           row++;
         }
-                
+
         if (row == m.arr.length) break;
-        
+
   }
-  
+
   return det;
 }
 
@@ -644,7 +644,7 @@ the jth column  */
 Matrix.prototype.minor = function(i,j)
 {
   var m = new Matrix(this.arr.length-1,this.arr[0].length-1);
-  
+
   for(var k1 = 0; k1 < i; k1++)
   {
     for(var k2 = 0; k2 < j; k2++)
@@ -659,7 +659,7 @@ Matrix.prototype.minor = function(i,j)
     for(var k2= j+1; k2 < this.arr[0].length; k2++)
       m.arr[k1-1][k2-1] = this.arr[k1][k2];
   }
-  
+
   return m;
 }
 
@@ -670,9 +670,9 @@ Matrix.prototype.det2 = function()
 {
   if (! this.isSquare())
     throw "Error in taking determinant.  The matrix is not square.";
-  
+
   var result;
-  
+
   if (this.arr.length == 2)
   {
     result = new Add(new Multiply(this.arr[0][0],this.arr[1][1]),
@@ -687,15 +687,15 @@ Matrix.prototype.det2 = function()
         ops[i] = new Multiply(this.arr[0][i], this.minor(0,i).det2());
       else
         ops[i] = new Multiply(new Integer(-1),this.arr[0][i], this.minor(0,i).det2());
-      
+
       ops[i] = ops[i].simplify();
     }
-    
+
     result = new Add(ops);
   }
   return result.simplify();
-  
-}    
+
+}
 
 /* The following finds the inverse of the matrix stored in this.
 
@@ -705,24 +705,24 @@ Matrix.prototype.invert = function ()
 {
   if (! this.isSquare())
     throw "Error in taking inverse.  The matrix is not square.";
-  
+
   var m = new Matrix(this.arr.length,2*this.arr[0].length);
-  
+
   for(var j = 0; j < m.arr.length; j++)
   {
     for(var i = 0; i < this.arr[0].length; i++)
       m.arr[j][i] = this.arr[j][i];
     m.arr[j][j+this.arr.length] = new Integer(1);
   }
-  
-  
-  
+
+
+
   m = m.rowReduceRational();
-  
+
   var minv = new Matrix(this.arr.length, this.arr.length);
-  
+
   // check to see if the matrix is invertible
-  
+
   var exists = true;
   for(var i = 0; i < this.arr[0].length - 1; i++)
     if (! m.arr[m.arr.length-1][i].equals(Integer.ZERO))
@@ -730,23 +730,23 @@ Matrix.prototype.invert = function ()
       exists = false;
       break;
     }
-    
+
     if (!m.arr[m.arr.length-1][m.arr.length-1].equals(Integer.ONE))
       exists = false;
-    
+
     if (!exists)
       throw "The inverse of the matrix does not exist";
-    
+
     for(var j = 0; j < minv.arr.length; j++)
     {
       for(var i = 0; i < minv.arr[0].length; i++)
         minv.arr[j][i] = m.arr[j][i+minv.arr.length];
     }
-    
+
     return minv;
-    
-    
-    
+
+
+
 }
 
 
@@ -758,7 +758,7 @@ ElementaryRowOperation.prototype.constructor = ElementaryRowOperation;
 
 function ElementaryRowOperation()
 {
-  
+
 }
 
 /* This method parses a string and returns either a RowSwap, RowMultiplication
@@ -767,16 +767,16 @@ function ElementaryRowOperation()
 
 ElementaryRowOperation.parse = function (str)
 {
-  try 
+  try
   {
     var rowOps = new Array();
-    
+
     var form3 =/pivot\((\d+),(\d+)\)/;
     var form4 =/piv\((\d+),(\d+)\)/;
-    
+
     var result3 = form3.exec(str);
     var result4 = form4.exec(str);
-    
+
     if(str=="toDecimal")
     {
       rowOps[0] = new ToDecimal();
@@ -792,72 +792,72 @@ ElementaryRowOperation.parse = function (str)
     else if (str.indexOf(",")>0)
     {
       substrings = str.split(",");
-      
+
       for(var i = 0; i< substrings.length; i++)
         rowOps[i] = this.parseString(substrings[i]);
-      
+
     } else
     {
       rowOps[0] = this.parseString(str);
-      
+
     }
-    
+
     return rowOps;
-    
+
   } catch (er)
   {
     throw er;
   }
-  
+
 }
 
 ElementaryRowOperation.parseString= function (str)
-{   
+{
   str = str.replace(/\s/g,"");
   var form1 = /(\(?(-?[\.\d+\/]*)\)?\*?R(\d+)(\+|-))?\(?(-?[\.\d+\/]*)?\)?\*?R(\d+)(->R(\d+)(.*))?/;
   var form2 = /S(\d+)(\d+)/;
   var form3 = /R(\d+)<->R(\d+)/;
-  
+
   var num1, row1, num2, row2, row3;
-  
-/* First check if the operation is a row swap */  
-  
+
+/* First check if the operation is a row swap */
+
   var result2 = form2.exec(str);
   var result3 = form3.exec(str);
-  
+
   if ((result2 != null)||(result3 != null))
   {
-    result = (result2 != null)?result2:result3; 
-    
+    result = (result2 != null)?result2:result3;
+
     row1 = Number(result[1]);
     row2 = Number(result[2]);
-    
+
     if (row1==row2)
       throw "Error in Swapping rows: the two rows must be unique.";
-    
+
     return new RowSwap(row1,row2);
   }
-  
-  
+
+
   var result = form1.exec(str);
-  
+
   if(result != null)
   {
     if (result[1] == undefined) // has form 2R2->R2;
     {
       if (result[5]=="-")
         num2 = new Integer(-1);
-      else if (result[4]=="-") 
+      else if (result[4]=="-")
         num2 = new Multiply(Mnumber.parseConstant(result[5]),new Integer(-1));
-      else 
+      else
         num2 = Mnumber.parseConstant(result[5]);
-      
+
       row2 = Number(result[6]);
       if (result[8] == undefined)
         row3 = row2
-      else 
+      else
         row3 = Number(result[8]);
-      
+
       if (!((row2 == row3) || (row2 == row1)))
         throw "Illegal Row Operation.  The row number following \n the -> must be one of the first two rows.";
       return new RowMultiply(row2,num2);
@@ -869,7 +869,7 @@ ElementaryRowOperation.parseString= function (str)
     else
       num1 = Mnumber.parseConstant(result[2]);
     row1 = Number(result[3]);
-    
+
     if ((result[5]==undefined)||(result[5]==""))
     {
       if (result[4]=="-")
@@ -883,31 +883,31 @@ ElementaryRowOperation.parseString= function (str)
       else
         num2 = Mnumber.parseConstant(result[5]);
     }
-    
+
     row2 = Number(result[6]);
-    
+
     if (result[8] == undefined)
       row3 = row2;
     else
       row3 = Number(result[8]);
-    
+
     return new RowMultiplyAndAdd(row1, num1, row2, num2, row3);
-    
-    
+
+
   }
-  
-  
-    
+
+
+
   throw "Error in Row operation";
   // Throw an error!
-  
+
 }
 
 RowSwap.prototype = new ElementaryRowOperation();
 RowSwap.prototype.constructor = RowSwap;
 function RowSwap(i,j)
 {
-  this.row1 = i; 
+  this.row1 = i;
   this.row2 = j;
 }
 
@@ -938,7 +938,7 @@ RowMultiply.prototype.toString = function ()
 RowMultiply.prototype.toLaTeX = function()
 {
   return this.factor.toLaTeX() + "R_{ " + this.row + "} \\rightarrow R_{ " + this.row + "}";
-} 
+}
 
 
 RowMultiplyAndAdd.prototype = new ElementaryRowOperation();
@@ -961,47 +961,47 @@ RowMultiplyAndAdd.prototype.toString = function ()
 RowMultiplyAndAdd.prototype.toLaTeX = function()
 {
   var r1="R_{ " + this.row1 +"}";
-    
+
   var row1, row2;
-  
+
   if ((this.factor1 instanceof Integer) &&  (this.factor1.value == -1))
     row1 = "-" + r1;
   else if ((this.factor1 instanceof Integer) && (this.factor1.value == 1))
     row1 = r1;
   else
     row1 = this.factor1.toLaTeX() + r1;
-  
-  var op, fact2; 
+
+  var op, fact2;
   if ((this.factor2 instanceof Integer) && (this.factor2.value <0))
   {
     op = "-";
     fact2 = new Integer(-this.factor2.value);
   }
-  
+
   else if ((this.factor2 instanceof Rational) && (this.factor2.top <0))
   {
     op = "-";
     fact2 = new Rational(-this.factor2.top,this.factor2.bottom);
   }
-  else 
+  else
   {
     op = "+";
     fact2 = this.factor2;
   }
-  
-  
+
+
   var r2 = "R_{" + this.row2 +" }";
-  
-  
+
+
   if ((fact2 instanceof Integer) &&  (fact2.value == 1))
     row2 = r2;
   else
     row2 = fact2.toLaTeX()+r2;
-  
-  
-  
+
+
+
   return row1 + op + row2 + "\\rightarrow " + "R_{ " + this.row3 + "}";
-  
+
 }
 
 
@@ -1010,7 +1010,7 @@ Pivot.prototype = new ElementaryRowOperation();
 Pivot.prototype.constructor = Pivot;
 function Pivot(i,j)
 {
-  this.row = i; 
+  this.row = i;
   this.col = j;
 }
 
@@ -1021,7 +1021,7 @@ Pivot.prototype.toString = function()
 
 Pivot.prototype.toLaTeX = function ()
 {
-  return "\\mbox{pivot}(" + this.row + "," + this.col + ")"; 
+  return "\\mbox{pivot}(" + this.row + "," + this.col + ")";
 }
 
 /*
@@ -1034,7 +1034,7 @@ PivotPreserveIntegers.prototype = new ElementaryRowOperation();
 PivotPreserveIntegers.prototype.constructor = PivotPreserveIntegers;
 function PivotPreserveIntegers(i,j)
 {
-  this.row = i; 
+  this.row = i;
   this.col = j;
 }
 
@@ -1045,7 +1045,7 @@ PivotPreserveIntegers.prototype.toString = function()
 
 PivotPreserveIntegers.prototype.toLaTeX = function ()
 {
-  return "\\mbox{piv}(" + this.row + "," + this.col + ")"; 
+  return "\\mbox{piv}(" + this.row + "," + this.col + ")";
 }
 
 ToDecimal.prototype = new ElementaryRowOperation();
