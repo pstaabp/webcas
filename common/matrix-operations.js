@@ -25,12 +25,14 @@ function Matrix(str)
     }
 
     for(var i = 1; i < arr.length; i++)
+    {
       if (arr[0].length != arr[i].length)
-      throw "Error in constructing matrix.  Each row must be the same length.";
-
-
-
+      {
+        throw "Error in constructing matrix.  Each row must be the same length.";
+      }
+    }
   }
+
   if (arguments.length==2)
   {
     var arr = new Array(arguments[0]);

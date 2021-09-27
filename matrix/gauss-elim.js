@@ -28,18 +28,12 @@ $j(document).ready(function()
       $j("#simplexMode").attr("checked",settings.simplexMode);
       $j("#vertLine").val(settings.vertLine);
       $j("#horizLine").attr("checked",settings.horizLine);
-        $j("#numSlackVars").attr("disabled",true);
-        if (settings["slackLine"]=="none") {$j("#slackLine[value='none']").attr("checked","checked");}
-        else if (settings["slackLine"]=="std") {$j("#slackLine[value='std']").attr("checked","checked");}
-        else if (parseInt(settings["slackLine"])>-1){
-            $j("#numSlackVars").attr("disabled",false);
-            $j("#numSlackVars").val(settings["slackLine"]);
-            $j("#slackLine[value='custom']").attr("checked","checked");
-        }
-        $j("#firstColLine").attr("checked",settings.firstColLine);
-        $j("#addRow").attr("checked",settings.addRow);
-        $j("#showLaTeX").attr("checked",settings.showLaTeX);
-        $j("#pivButton").attr("checked", settings.pivButton);
+      $j("#numSlackVars").attr("disabled",true);
+      $j("#slackLine").attr("checked",settings.slackLine);
+      $j("#firstColLine").attr("checked",settings.firstColLine);
+      $j("#addRow").attr("checked",settings.addRow);
+      $j("#showLaTeX").attr("checked",settings.showLaTeX);
+      $j("#pivButton").attr("checked", settings.pivButton);
 
     }
 
@@ -68,6 +62,7 @@ function parseSettings() {
     settings.horizLine = $j("#horizLine").is(':checked');
     settings.pivButton = $j("#pivButton").is(':checked');
     settings.showLaTeX = $j("#showLaTeX").is(':checked');
+    settings.slackLine = $j("#slackLine").is(':checked');
     localStorage.setItem("GEset", JSON.stringify(settings));
     console.log(settings);
 }
@@ -76,15 +71,14 @@ function parseSettings() {
 
 function restart()
 {
-
-    $j(".row-op-step,#orig-matrix,.input-boxes").remove();
-    $j("#row1,#entry-buttons").css("display","block");
-    if (matrices.length > 0) {
-        $j("#matrix-entry").val(matrices[0].toString().gsub('<br/>',"\n").gsub(","," "));
-    }
-    step = [0];
-    matrices = [];
-    $j("#matrix-entry").focus();
+  $j(".row-op-step,#orig-matrix,.input-boxes").remove();
+  $j("#row1,#entry-buttons").css("display","block");
+  if (matrices.length > 0) {
+      $j("#matrix-entry").val(matrices[0].toString().gsub('<br/>',"\n").gsub(","," "));
+  }
+  step = [0];
+  matrices = [];
+  $j("#matrix-entry").focus();
 }
 
 
@@ -116,7 +110,7 @@ function storeMatrix()
 
     if(settings.simplexMode){matrices[0].SMMultiplier = new Integer(1);}
 
-
+    console.log("here");
     $j("#main-div").append("<div id='orig-matrix'> \\[" + decorateMatrix(matrices[0]) + "\\] </div>");
     $j("#row1").css("display","none");
     $j("#entry-buttons").css("display","none");
@@ -127,39 +121,44 @@ function storeMatrix()
 
 function decorateMatrix(m)
 {
- var mstr = m.toLaTeX();
-    // This decorates the matrix depending on the settings.
-    if(settings.slackLine != "none")
-    {
-    var n = 0;
-    if (settings.slackLine == "std"){
-        n = m.arr[0].length - m.arr.length-1; // get the number of regular variables.
-    } else if (parseInt(settings.slackLine)>-1) {
-        n = m.arr[0].length - parseInt(settings.slackLine)-2;
-    }
-    if(n>0){
-        var re = new RegExp("\{(r{"+n+"})(.*)\}");
-        mstr = mstr.replace(re,"{$1|$2}");
-    }
-    }
+  var mstr = m.toLaTeX();
+  // This decorates the matrix depending on the settings.
+  console.log(settings);
+  if(settings.slackLine)
+  {
+    var n = m.arr[0].length - m.arr.length-1; // get the number of regular variables.
+    var re = new RegExp("\{(r{"+n+"})(.*)\}");
+    mstr = mstr.replace(re,"{$1|$2}");
+  }
 
-    if(settings.vertLine=="last_col"){ mstr=mstr.replace(/\{(.*)r\}/,"{$1|r}");}
-    if(settings.vertLine=="middle"){
-        var n = m.arr[0].length;
-        if(n%2!=0){
-            console.log("ERRoR!!");
-        } else {
-            var re = new RegExp("\{(r{"+(~~(n/2))+"})(r+)\}");
-            mstr = mstr.replace(re,"{$1|$2}");
-            console.log(mstr);
-        }
+  if(settings.vertLine=="last_col")
+  {
+    mstr=mstr.replace(/\{(.*)r\}/,"{$1|r}");
+  } else if(settings.vertLine=="middle")
+  {
+    var n = m.arr[0].length;
+    if(n%2!=0)
+    {
+      console.log("ERRoR!!");
+    } else {
+      var re = new RegExp("\{(r{"+(~~(n/2))+"})(r+)\}");
+      mstr = mstr.replace(re,"{$1|$2}");
+      console.log(mstr);
     }
-    if(settings.firstColLine){ mstr=mstr.replace(/\{r(.*)\}/,"{r|$1}");}
+  }
+
+  if(settings.firstColLine)
+  {
+    mstr=mstr.replace(/\{r(.*)\}/,"{r|$1}");}
     if(settings.horizLine){
     var strarr=mstr.split("\\\\"); mstr="";
     var n = strarr.length;
-    for(var i=0; i<n-3;i++){mstr+=strarr[i] + "\\\\";} mstr+= strarr[n-3]+"\\\\ \\hline";
-    mstr+=strarr[n-2]+"\\\\" + strarr[n-1];
+    for(var i=0; i<n-3;i++)
+    {
+      mstr+=strarr[i] + "\\\\";
+    }
+    mstr+= strarr[n-3]+"\\\\ \\hline";
+    mstr+= strarr[n-2]+"\\\\" + strarr[n-1];
     }
     return mstr;
 
@@ -172,12 +171,18 @@ function rowOpInput()
         "<input id='input-box' type='text' class='form-control' placeholder='Row Operation:' aria-label='Enter the Row Operation'> " +
         "<button id='enter-button' class='btn btn-outline-secondary' type='button'>Enter</button> " +
         "<button id='undo-button' class='btn btn-outline-secondary' type='button'>Undo</button>";
-    // var str = "<div id='row-op-input'>input: <input class="id='input-box' type='text' size='30'></input>" +
-    //     "<button id='enter-button'>Enter</button>" +
-    //     " <button id='undo-button'>Undo</button>";
-    if(settings.showLaTeX){str += "<button id='LaTeX-button' class='btn btn-outline-secondary'  data-bs-toggle='modal' data-bs-target='#latex-modal'>Show LaTeX</button>"; }
-    if (settings.addRow) { str += "<button id='addRow-button'>Add Row/Col to Tableau</button>"; }
-    if (settings.pivButton) { str += "<button id='pivButton'>Select Pivot</button>"; }
+    if(settings.showLaTeX)
+    {
+      str += "<button id='LaTeX-button' class='btn btn-outline-secondary'  data-bs-toggle='modal' data-bs-target='#latex-modal'>Show LaTeX</button>";
+    }
+    if (settings.addRow)
+    {
+      str += "<button id='addRow-button' class='btn btn-outline-secondary' >Add Row/Col to Tableau</button>";
+    }
+    if (settings.pivButton)
+    {
+      str += "<button id='pivButton' class='btn btn-outline-secondary' >Select Pivot</button>";
+    }
     str += "</div></div>";
 
     $j("#main-div").append(str);
@@ -339,7 +344,8 @@ function undo(obj)
 // In addition, hovering an element will give a different cursor and background color.
 function clickablePivots() {
     // This sections grabs the current matrix and stores its name and elements
-    var newMatrixId = $j("#output").children().eq(-2)[0].id;
+    console.log($j("#main-div"));
+    var newMatrixId = $j("#main-div").children().eq(-2)[0].id;
     var entries = $j("#"+newMatrixId+" .mn");
     var numRows = matrices[matrices.length - 1].arr.length;
     var index = 0;
@@ -360,7 +366,7 @@ function clickablePivots() {
 // Called during rowOpInput() to make the previous matrix unclickable
 function unclickablePivots() {
     // This sections grabs the current matrix and stores its name and elements
-    var oldMatrixId = $j("#output").children().eq(-3)[0].id;
+    var oldMatrixId = $j("#main-div").children().eq(-3)[0].id;
     var entries = $j("#" + oldMatrixId + " .mn");
 
     // If its not the original matrix, slice the piv(x,y) numbers
