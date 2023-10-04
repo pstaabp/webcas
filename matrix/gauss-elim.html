@@ -252,7 +252,8 @@ body {padding-top: 55px;}
             <div class="row mb-3">
               <div class="collapse" id="simplex-mode-help">
                 <div class="card card-body" style="font-size: 80%">
-                  Help for simplex mode.
+                  In simplex mode if the <code>piv</code> method is used, then all of the basic variables are scaled
+                  by the integer value of the pivot.
                 </div>
               </div>
             </div>
@@ -266,13 +267,9 @@ body {padding-top: 55px;}
               </div>
             </div>
             <div class="row mb-3">
-              <label for="" class="col-sm-8 col-form-label">Slack Variables Vertical Line:</label>
-              <div class="col-sm-4">
-                <select id="slackLine" class="form-select" aria-label="Slack Variable Vertical Line Mode">
-                  <option selected value="none">None</option>
-                  <option value="last_col">Before Last Column</option>
-                  <option value="middle">Middle of the Matrix</option>
-                </select>
+              <label for="" class="col-sm-10 col-form-label">Use vertical line to separate slack variables</label>
+              <div class="col-sm-2">
+                <input class="form-check-input" type="checkbox" value="" id="slackLine">
               </div>
             </div>
             <div class="row mb-3">
