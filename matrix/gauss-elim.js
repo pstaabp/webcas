@@ -69,7 +69,6 @@ function parseSettings() {
     settings.pivButton = $j("#pivButton").is(':checked');
     settings.showLaTeX = $j("#showLaTeX").is(':checked');
     localStorage.setItem("GEset", JSON.stringify(settings));
-    console.log(settings);
 }
 
 
@@ -161,11 +160,8 @@ function rowOpInput()
         "<input id='input-box' type='text' class='form-control' placeholder='Row Operation:' aria-label='Enter the Row Operation'> " +
         "<button id='enter-button' class='btn btn-outline-secondary' type='button'>Enter</button> " +
         "<button id='undo-button' class='btn btn-outline-secondary' type='button'>Undo</button>";
-    // var str = "<div id='row-op-input'>input: <input class="id='input-box' type='text' size='30'></input>" +
-    //     "<button id='enter-button'>Enter</button>" +
-    //     " <button id='undo-button'>Undo</button>";
     if(settings.showLaTeX){str += "<button id='LaTeX-button' class='btn btn-outline-secondary'  data-bs-toggle='modal' data-bs-target='#latex-modal'>Show LaTeX</button>"; }
-    if (settings.addRow) { str += "<button id='addRow-button'>Add Row/Col to Tableau</button>"; }
+    if (settings.addRow) { str += "<button id='addRow-button' class='btn btn-outline-secondary'>Add Row/Col to Tableau</button>"; }
     if (settings.pivButton) { str += "<button id='pivButton'>Select Pivot</button>"; }
     str += "</div></div>";
 
@@ -183,56 +179,51 @@ function rowOpInput()
 
 function addRowToTableau()
 {
-    var els = $j("#input-box").val().trim().split(/\s+/);
+    const els = $j("#input-box").val().trim().split(/\s+/);
 
-    var lastMat = matrices.last();
+    const lastMat = matrices.last();
 
-    var n = lastMat.arr.length;
-    var m = lastMat.arr[n-1].length;
+    const n = lastMat.arr.length;
+    const m = lastMat.arr[n-1].length;
 
     if (els.length != m+1){ alert("The new row in the input box does not contain the same number of elements as the new tableau."); return;}
 
-    var mat = new Matrix(n+1,m+1);
+    const mat = new Matrix(n+1,m+1);
     for(var i = 0; i < n-1; i++)
-    {
-	for(var j = 0; j < m-2; j++)
-	{
-	    mat.arr[i][j]=lastMat.arr[i][j];
-	}
+        for(var j = 0; j < m-2; j++)
+	        mat.arr[i][j]=lastMat.arr[i][j];
+
+
+    for(var i = 0; i < n-1; i++) {
+        mat.arr[i][m]=lastMat.arr[i][m-2];
+        mat.arr[i][m]=lastMat.arr[i][m-1];
     }
-    for(var i = 0; i < n-1; i++)
-    {
-	mat.arr[i][m]=lastMat.arr[i][m-2];
-	mat.arr[i][m]=lastMat.arr[i][m-1];
-    }
-    for(var j = 0; j < m-2; j++){ mat.arr[n][j]=lastMat.arr[n-1][j];}
+    for(var j = 0; j < m-2; j++) mat.arr[n][j]=lastMat.arr[n-1][j];
     mat.arr[n][m-1]=lastMat.arr[n-1][m-2];
     mat.arr[n][m]=lastMat.arr[n-1][m-1];
 
-    for(var j = 0; j <m+1;j++)
-    {
-	mat.arr[n-1][j]=Mnumber.parseConstant(els[j]);
-    }
+    mat.SMMultiplier = lastMat.SMMultiplier;
+
+    for(var j = 0; j <m+1;j++) mat.arr[n-1][j]=Mnumber.parseConstant(els[j]);
 
     matrices.push(mat);
     step.push(step.last()+1);
 
-         // remove the input box from the page
+    // remove the input box from the page
+    $j(".input-boxes").remove();
 
-      $j(".input-boxes").remove();
+    // Add the result to the page
 
-     // Add the result to the page
+    $j("#main-div").append("<div class='row-op-step' id='out-" + (step.last()) + "'></div>");
 
-     $j("#main-div").append("<div class='row-op-step' id='out-" + (step.last()) + "'></div>");
+    // Typeset the result
+    $j("#out-"+(step.last())).html("\\["+"" + "\\qquad" + decorateMatrix(matrices.last()) + "\\]");
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"out-" + (step.last())]);
 
-     // Typeset the result
-     $j("#out-"+(step.last())).html("\\["+"" + "\\qquad" + decorateMatrix(matrices.last()) + "\\]");
-     MathJax.Hub.Queue(["Typeset",MathJax.Hub,"out-" + (step.last())]);
+    rowOpInput();
 
-     rowOpInput();
-
-     // scroll to the bottom after entering in the input.
-     window.scroll(0,document.body.clientHeight);
+    // scroll to the bottom after entering in the input.
+    window.scroll(0,document.body.clientHeight);
 
 }
 
@@ -248,7 +239,6 @@ function showLaTeXcode()
 
 function parseRowOp()
 {
-    console.log("in parseRowOp");
     var rowOp = null;
     try
     {

@@ -209,7 +209,7 @@ Matrix.prototype.pivot = function (row,col)
 
   for(var i = 0; i < this.arr.length; i++)
     if (i != row)
-    m = m.multiplyRowBy(row, new Multiply(new Integer(-1),this.arr[i][col]),i,Integer.ONE);
+      m = m.multiplyRowBy(row, new Multiply(new Integer(-1),this.arr[i][col]),i,Integer.ONE);
 
   return m;
 
@@ -221,50 +221,18 @@ Matrix.prototype.pivot = function (row,col)
 
 Matrix.prototype.pivotPreserveIntegers = function (row,col)
 {
-  var m = this.clone()
-      ,factor1 = Integer.ONE
-      ,factor2 = Integer.ONE;
+  let m = this.clone();
+  if (m.SMMultiplier === undefined) m.SMMultiplier = Integer.ONE;
 
-  if (this.SMMultiplier){
+  if (m.arr[row][col].compareTo(Integer.ZERO)<0) m = m.multiplyRowBy(row, new Integer(-1));
+  for(var k = 0; k < this.arr.length; k++)
+    if (k != row)
+      m = m.multiplyRowBy(row,new Multiply(new Integer(-1), new Divide(m.arr[k][col], this.SMMultiplier)),
+                          k,new Divide(new Multiply(m.arr[row][col]), this.SMMultiplier));
 
-    if (m.arr[row][col].compareTo(Integer.ZERO)<0){
-      factor2 = new Integer(-1);
-    } else {
-      factor1 = new Integer(-1);
-    }
-
-
-    for(var k = 0; k < this.arr.length; k++)
-      if (k != row){
-        m = m.multiplyRowBy(row,new Multiply(factor1, new Divide(m.arr[k][col],this.SMMultiplier)),
-                            k,new Multiply(factor2,new Divide(m.arr[row][col],this.SMMultiplier)));
-      }
-    m = m.multiplyRowBy(row,factor2);
-    m.SMMultiplier = m.arr[row][col];
-    return m
-  }
-
-  if (m.arr[row][col].compareTo(Integer.ZERO)<0){
-    m = m.multiplyRowBy(row,new Integer(-1));
-  }
-
-  var factor = m.arr[row][col]
-
-  for(var i = 0; i < this.arr.length; i++)
-    if (i != row)
-    {
-      m = m.multiplyRowBy(row,new Multiply(new Integer(-1),this.arr[i][col]),i,factor);
-
-      var r = Integer.GCD(m.arr[i]);
-      if (r.compareTo(Integer.ZERO)<0){r = new Multiply(r,new Integer(-1));}
-      if (! (r.compareTo(Integer.ZERO)==0))
-      {
-        m = m.multiplyRowBy(i,new Divide(new Integer(1),r));
-      }
-    }
+  m.SMMultiplier = m.arr[row][col];
 
   return m;
-
 }
 
 
@@ -769,8 +737,6 @@ function ElementaryRowOperation()
 
 ElementaryRowOperation.parse = function (str)
 {
-  try
-  {
     var rowOps = new Array();
 
     var form3 =/pivot\((\d+),(\d+)\)/;
@@ -805,12 +771,6 @@ ElementaryRowOperation.parse = function (str)
     }
 
     return rowOps;
-
-  } catch (er)
-  {
-    throw er;
-  }
-
 }
 
 ElementaryRowOperation.parseString= function (str)

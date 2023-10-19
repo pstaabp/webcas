@@ -1,5 +1,5 @@
 Funct.prototype.toString = function () { return this.expr.toString();}
-Funct.prototype.evaluateToDouble = function (x,value) {return this.expr.evaluateToDouble(x,value); } 
+Funct.prototype.evaluateToDouble = function (x,value) {return this.expr.evaluateToDouble(x,value); }
 
 function Funct(str,variab)
 {
@@ -26,7 +26,7 @@ Expression.prototype.differentiate = function (v) { throw "differentiate not def
 Expression.prototype.simplify = function () { throw "simplify not defined";}
 
 Variable.prototype = new Expression();
-Variable.prototype.equals = function  (x) 
+Variable.prototype.equals = function  (x)
 {
     if (! (x instanceof Variable))
         return false;
@@ -85,7 +85,7 @@ function Add()
         for(var i = 0; i < arguments.length; i++)
             this.operands[i] = arguments[i];
     }
-    
+
     return this.simplify();
 }
 
@@ -97,31 +97,31 @@ Add.prototype.evaluate = function(x,value)
    return new Add(ops);
 }
 
-Add.prototype.evaluateToDouble = function(x,value) 
+Add.prototype.evaluateToDouble = function(x,value)
 {
     var sum = 0;
     for(var i = 0; i < this.operands.length; i++)
         sum += this.operands[i].evaluateToDouble(x,value);
-    
+
     return sum;
 }
 
-Add.prototype.toString = function() 
+Add.prototype.toString = function()
 {
     var str = "add(";
     for(var i = 0; i < this.operands.length-1; i++)
         str += this.operands[i].toString() + ",";
-    
+
     return str + this.operands[this.operands.length-1].toString() + ")";
 }
 
-Add.prototype.toLaTeX = function() 
-{ 
+Add.prototype.toLaTeX = function()
+{
     var str = "";
     for(var i = 0; i < this.operands.length-1; i++)
         str += this.operands[i].toLaTeX() +"+";
     str += this.operands[this.operands.length-1].toLaTeX();
-    
+
     return str;
 }
 
@@ -129,10 +129,10 @@ Add.prototype.toLaTeX = function()
 Add.prototype.differentiate = function(v)
 {
     var newOps = new Array();
-    
+
     for(var i = 0; i < this.operands.length; i++)
         newOps[i] = this.operands[i].differentiate(v);
-    
+
     return new Add(newOps);
 }
 
@@ -144,7 +144,7 @@ Add.prototype.differentiate = function(v)
 Add.shrinkOperands  = function (ops)
 {
   var newOps = new Array();
-    
+
     for(var pos = 0; pos < ops.length; pos++)
     {
         if (ops[pos] instanceof Mnumber)
@@ -159,19 +159,19 @@ Add.shrinkOperands  = function (ops)
             num = num.simplify();
             if (!num.equals(new Integer(0)))
                 newOps.push(num);
-            
+
             pos += tmp-1;
         } else if (ops[pos] instanceof Variable)
         {
-            var tmp = 1; 
+            var tmp = 1;
             while(ops[pos].equals(ops[pos+tmp]))
             {
                 tmp++;
             }
-            
+
             newOps.push(new Multiply(ops[pos],new Integer(tmp)));
             pos += tmp-1;
-            
+
         } else if (ops[pos] instanceof Complex)
         {
            var tmp = 1;
@@ -181,9 +181,9 @@ Add.shrinkOperands  = function (ops)
               op = op.plus(ops[pos+tmp]);
               tmp++;
            }
-           
+
            newOps.push(op);
-           
+
         } else
         {
             newOps.push(ops[pos].simplify());
@@ -192,19 +192,19 @@ Add.shrinkOperands  = function (ops)
 
     return newOps;
 }
-    
+
 Add.prototype.simplify = function ()
 {
     if (this.operands.length == 0)
         return new Integer(0);
     else if (this.operands.length == 1)
         return this.operands[0];
-     
+
     var newOps = Add.flatten(this.operands);
     this.operands = sortOperands(newOps);
-   
+
     this.operands =  Add.shrinkOperands(this.operands);
-    
+
     var complexArgs = false;
     for(var i= 0; i < this.operands.length; i++)
     {
@@ -214,34 +214,34 @@ Add.prototype.simplify = function ()
           break;
        }
     }
-    
+
     // If any of the arguments are complex, make everything a complex
-    // 
-    
+    //
+
     if (complexArgs)
     {
        var op = new Complex(Integer.ZERO, Integer.ZERO);
        for(var i=0; i < this.operands.length; i++)
           op = op.plus(this.operands[i])
-          
+
        return op;
     }
 
-    // Try to simplify once more    
-       
+    // Try to simplify once more
+
     if (this.operands.length == 0)
         return new Integer(0);
     else if (this.operands.length == 1)
         return this.operands[0]
     else
-        return this; 
-    
+        return this;
+
 }
 
 Add.flatten = function (operands)
 {
     var newOps = new Array();
-    
+
     for(var i = 0; i < operands.length; i++)
     {
         if(operands[i] instanceof Add)
@@ -250,10 +250,10 @@ Add.flatten = function (operands)
             for(j=0; j < ops.length; j++)
                 newOps.push(ops[j]);
         }
-        else  
+        else
             newOps.push(operands[i]);
     }
-    
+
     return newOps;
 }
 
@@ -289,13 +289,13 @@ function Multiply()
         this.operands = new Array();
         return this;
     }
-    else 
+    else
     {
         this.operands = new Array(arguments.length);
         for(var i = 0; i < arguments.length; i++)
             this.operands[i] = arguments[i];
     }
-    return this.simplify();   
+    return this.simplify();
 }
 
 Multiply.prototype.evaluate = function(x,value)
@@ -305,31 +305,31 @@ Multiply.prototype.evaluate = function(x,value)
       ops.push(this.operands[i].evaluate(x,value));
    return new Multiply(ops);
 }
-Multiply.prototype.evaluateToDouble = function(x,value) 
+Multiply.prototype.evaluateToDouble = function(x,value)
 {
-    var prod = 1; 
+    var prod = 1;
     for(var i = 0; i < this.operands.length; i++)
         prod *= this.operands[i].evaluateToDouble(x,value);
-    
+
     return prod;
 }
 
-Multiply.prototype.toString = function() 
-{ 
+Multiply.prototype.toString = function()
+{
     var str = "mult(";
     for(var i = 0; i < this.operands.length-1; i++)
         str += this.operands[i].toString() +",";
     str += this.operands[this.operands.length-1] + ")";
-    
+
     return str;
 }
-Multiply.prototype.toLaTeX = function() 
-{ 
+Multiply.prototype.toLaTeX = function()
+{
     var str = "(";
     for(var i = 0; i < this.operands.length-1; i++)
         str += this.operands[i].toLaTeX() +"\\cdot ";
     str += this.operands[this.operands.length-1].toLaTeX() + ")";
-    
+
     return str;
 }
 
@@ -343,7 +343,7 @@ Multiply.prototype.differentiate = function(v)
         var ops1 = new Array();
         for(var j = 0; j < this.operands.length; j++)
         {
-            if (i==j) 
+            if (i==j)
                 ops1[j] = this.operands[j].differentiate(v);
             else
                 ops1[j] = this.operands[j];
@@ -366,19 +366,19 @@ Multiply.prototype.equals = function (x)
         }
         return true;
     }
-    
+
 }
 
 // This operation sorts the operands in the order:
-// Numbers, Variables, Add, Subtracts, Multiplys, Divides, Others 
+// Numbers, Variables, Add, Subtracts, Multiplys, Divides, Others
 
 
 function sortOperands(operands)
 {
     var ops = new Array();
     var order = new Array();
-    
-    
+
+
     for(var i = 0; i < operands.length; i++)
     {
         order[i] = i;
@@ -391,9 +391,9 @@ function sortOperands(operands)
         else if (operands[i] instanceof Complex) ops[i] = 6;
         else ops[i] = 7;
     }
-    
-    // Bubblesort the ops 
-    
+
+    // Bubblesort the ops
+
     for(var i = 0; i < ops.length-1; i++)
     {
         for(var j = i; j < ops.length; j++)
@@ -405,23 +405,23 @@ function sortOperands(operands)
             }
         }
     }
-    
+
     var newOps = new Array();
-    
+
     for(var i = 0; i < ops.length; i++)
         newOps[i] = operands[order[i]];
-    
-    
+
+
     return newOps;
-    
-    
-    
+
+
+
 }
 
 Multiply.flatten = function (operands)
 {
     var newOps = new Array();
-    
+
     for(var i = 0; i < operands.length; i++)
     {
         if(operands[i] instanceof Multiply)
@@ -430,18 +430,18 @@ Multiply.flatten = function (operands)
             for(j=0; j < ops.length; j++)
                 newOps.push(ops[j]);
         }
-        else  
+        else
             newOps.push(operands[i]);
     }
-    
+
     return newOps;
 }
-    
+
 
 Multiply.shrinkOperands = function (ops)
 {
     var newOps = new Array();
-    
+
     for(var pos = 0; pos < ops.length; pos++)
     {
         if (ops[pos] instanceof Mnumber)
@@ -458,16 +458,16 @@ Multiply.shrinkOperands = function (ops)
             {
                 newOps = new Array();
                 newOps.push(new Integer(0));
-                
+
                 return newOps;
             }
-            else 
+            else
                 newOps[newOps.length]=num;
-            
+
             pos += tmp-1;
         } else if (ops[pos] instanceof Variable)
         {
-            var tmp = 1; 
+            var tmp = 1;
             while(ops[pos].equals(ops[pos+tmp]))
             {
                 tmp++;
@@ -477,16 +477,16 @@ Multiply.shrinkOperands = function (ops)
             else
                 newOps.push(ops[pos]);
             pos += tmp-1;
-            
-        } 
+
+        }
         else
         {
             newOps[newOps.length]=ops[pos].simplify();
         }
     }
-    
-  
-    
+
+
+
     return newOps;
 }
 
@@ -498,10 +498,10 @@ Multiply.prototype.simplify = function ()
 
     var newOps = Multiply.flatten(this.operands);
     this.operands = sortOperands(newOps);
-    
-    
+
+
     this.operands =  Multiply.shrinkOperands(this.operands);
-    
+
     var complexArgs = false; var divArgs = false;
     for(var i= 0; i < this.operands.length; i++)
     {
@@ -516,14 +516,13 @@ Multiply.prototype.simplify = function ()
          break;
        }
     }
-    
+
     // If any arguments are Divide, create a new Divide Object
-    
+
     if (divArgs)
     {
-      //console.log(this.operands);
       var topOps = new Array(); var bottomOps = new Array();
-      
+
       for(var i = 0; i < this.operands.length; i++)
       {
           if (this.operands[i] instanceof Divide)
@@ -533,50 +532,49 @@ Multiply.prototype.simplify = function ()
           }
            else
              topOps.push(this.operands[i]);
-           
+
       }
-      //console.log(topOps,bottomOps);
-      
+
       return new Divide(new Multiply(topOps),new Multiply(bottomOps));
-    }     
-           
-    
+    }
+
+
     // If any of the arguments are complex, make everything a complex
-    // 
-    
+    //
+
     if (complexArgs)
     {
        var op = new Complex(Integer.ONE, Integer.ZERO);
        for(var i=0; i < this.operands.length; i++)
           op = op.times(this.operands[i])
-          
+
        return op;
     }
-    
+
     if (this.operands.length == 1)
         return this.operands[0];
     else
     {
       for(var i= 0; i < this.operands.length; i++)
         this.operands[i].simplify();
-      
+
       return this;
     }
 }
 
 Divide.prototype = new Expression();
 Divide.prototype.constructor = Divide;
-Divide.prototype.evaluate = function(x,expr) 
+Divide.prototype.evaluate = function(x,expr)
 {
    return new Divide(this.oper1.evaluate(x,expr),this.oper2.evaluate(x,expr));
 }
-Divide.prototype.evaluateToDouble = function(x,value) 
+Divide.prototype.evaluateToDouble = function(x,value)
 {
     return this.oper1.evaluateToDouble(x,value)/ this.oper2.evaluateToDouble(x,value);
 }
 Divide.prototype.toString = function() { return "div(" + this.oper1 + "," + this.oper2 + ")";}
-/*Divide.prototype.toMathML = function() 
-{ 
+/*Divide.prototype.toMathML = function()
+{
     return <mfrac>{this.oper1.toMathML()}{this.oper2.toMathML()}</mfrac>;
 } */
 
@@ -604,7 +602,7 @@ Divide.prototype.simplify = function ()
       this.oper2 = this.oper2.simplify();
       return this;
    }
-} 
+}
 
 Divide.prototype.equals = function (x)
 {
@@ -630,7 +628,7 @@ Power.prototype.evaluate = function(x,value)
 {
    return new Power(this.oper1.evaluate(x,value), this.oper2.evaluate(x,value));
 }
-Power.prototype.evaluateToDouble = function(x,value) 
+Power.prototype.evaluateToDouble = function(x,value)
 {
     return Math.pow(this.oper1.evaluateToDouble(x,value), this.oper2.evaluateToDouble(x,value));
 }
@@ -640,14 +638,14 @@ function Power(oper1,oper2)
 {
     this.oper1 = oper1;
     this.oper2 = oper2;
-    
+
     return this.simplify();
 }
 Power.prototype.differentiate = function (varx)
 {
-    return new Multiply(this.oper2, this.oper1.differentiate(varx), 
+    return new Multiply(this.oper2, this.oper1.differentiate(varx),
        new Power(this.oper1, new Subtract(this.oper2,new Integer(1))));
-    
+
 }
 
 Power.prototype.equals = function (x)
@@ -655,8 +653,8 @@ Power.prototype.equals = function (x)
     return ((this.oper1.equals(x.oper1)) && (this.oper2.equals(x.oper2)));
 }
 
-Power.prototype.simplify = function () 
-{ 
+Power.prototype.simplify = function ()
+{
     if ((this.oper1 instanceof Integer) && (this.oper2 instanceof Integer))
     {
         if (this.oper2.value == 0)
@@ -666,7 +664,7 @@ Power.prototype.simplify = function ()
         var ops = new Array();
         for(var i = 0 ; i < this.oper2.value; i++)
             ops[i] = new Integer(this.oper1.value);
-        
+
         return (new Multiply(ops)).simplify();
         }
     } else if ((this.oper1 instanceof Sqrt) && (this.oper2 instanceof Integer))
@@ -676,7 +674,7 @@ Power.prototype.simplify = function ()
     {
       this.oper1 =this.oper1.simplify();
       this.oper2 = this.oper2.simplify();
-        
+
       return this;
     }
 }
@@ -689,7 +687,7 @@ Sqrt.prototype.constructor = Sqrt;
 Sqrt.prototype.evaluateToDouble = function(x,value) { return Math.sqrt(this.oper.evaluateToDouble(x,value));}
 Sqrt.prototype.toString = function() { return "sqrt(" + this.oper + ")";}
 function Sqrt(oper)
-{  
+{
    if (arguments.length ==0)
       this.oper = null;
    else
@@ -706,7 +704,7 @@ Sqrt.prototype.simplify = function ()
    else if (this.oper instanceof Integer)
    {
       if (this.oper.value == 1)
-         return new Integer(1); 
+         return new Integer(1);
       // See if there are perfect squares.
       var factors = Integer.factorInteger(this.oper.value);
       var outside = 1;
@@ -720,13 +718,13 @@ Sqrt.prototype.simplify = function ()
                outside *= factors[i];
                i++;
             }  else  inside *= factors[i];
-         }  
+         }
       }
       var sq = new Sqrt();
       sq.oper = new Integer(inside);
-      
+
       return new Multiply(new Integer(outside), sq);
-   
+
    } else return this;
 }
 

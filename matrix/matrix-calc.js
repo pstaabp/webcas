@@ -5,7 +5,7 @@ var inputVisible = false;
 var $j = jQuery.noConflict();
 
 var results = new Array();
-var matrix_modal; 
+var matrix_modal;
 
 const pencil = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">' +
   '<path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/> ' +
@@ -25,7 +25,7 @@ $j(document).ready(function()
   }
 
   $j("#save-matrix-button").click(storeMatrix);
-  $j("#clear-matrix-button").click(function (){   
+  $j("#clear-matrix-button").click(function (){
     $j("#matrix-entry").val("").focus();
   });
 
@@ -45,7 +45,7 @@ $j(document).ready(function()
   createInputForm();
 
   // setup the enter matrix modal
-   
+
    matrix_modal = new bootstrap.Modal(document.getElementById('enter-matrix-modal'), {})
 });
 
@@ -89,7 +89,7 @@ function updateMatrices()
    }
 
    $j(".edit-matrix").click(editMatrix);
-   $j(".delete-matrix").click(deleteMatrix); 
+   $j(".delete-matrix").click(deleteMatrix);
    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"right"]);
    $j("#input-text").focus();
 
@@ -98,7 +98,7 @@ function updateMatrices()
 
 function decorateVariable(variable){
    let var_re = /([a-zA-Z])(\d)/g;
-   return variable.replace(var_re, "$1_$2"); 
+   return variable.replace(var_re, "$1_$2");
 }
 
 
@@ -107,10 +107,10 @@ function createInputForm()
    var str = "<div class='row md-3 input-boxes'><div class='input-group'> " +
    "<input id='input-text' type='text' class='form-control' placeholder='Matrix Calculation:' aria-label='Enter the Row Operation'> " +
    "<button id='input-enter' class='btn btn-outline-secondary' type='button'>Enter</button></div></div> ";
-   
+
    $j("#left-output").append(str);
 
-   $j("#input-enter").click( function () { 
+   $j("#input-enter").click( function () {
       parseInput($j("#input-text").val());
    });
    $j("#input-text").keypress(function (e) {
@@ -126,7 +126,7 @@ var unaryRE = /(\w+)\(([\w\[\]]+)\)/;
 var binaryRE = /(\w+)\(([\w\[\]]+),([\w\[\]]+)\)/;
 var matOpRE = /^(\[\d+\]|\w+|-?\d+|\(-?\d+\/\d+\))([\+\-\*\^])(\[\d+\]|\w+|\d+)$/
 
-/* this gets the matrix that is either stored as a variable name 
+/* this gets the matrix that is either stored as a variable name
   or as [\d] */
 function getMatrix(str) {
    var brackets=/\[(\d+)\]/;
@@ -166,7 +166,7 @@ function unaryOperator(oper,varName) {
    case "rref":
       var res = matrix.rowReduce()
       return {matrix: res, expr: "\\mbox{rref}("+expr+")"} ; //as_string: "\\[ \\mbox{rref}("+varName+")=" + res.toLaTeX() + "\\]"};
-   case "I": 
+   case "I":
       var n
       try {
          n = parseInt(varName)
@@ -184,21 +184,21 @@ function unaryOperator(oper,varName) {
 function matrixOperation(oper,var1,var2) {
    var num1, num2 , mat1, mat2, expr1, expr2;
    var num1_scalar = false;
-   var num2_scalar = false; 
+   var num2_scalar = false;
    // if the first "variable" is a number
    try {
       num1 = Mnumber.parseConstant(var1);
       num1_scalar = true;
-   } 
+   }
    catch (err){ // else it is a variable.
       mat1 = getMatrix(var1).matrix;
       expr1 = getMatrix(var1).expr;
-   } 
+   }
    if (oper=="^" && var2=="T"){ // transpose
       mat1 = getMatrix(var1).matrix;
       expr1 = getMatrix(var1).expr;
       var res = mat1.transpose();
-      return {matrix: res , expr: "("+expr1+")^T"}; 
+      return {matrix: res , expr: "("+expr1+")^T"};
    }
 
    try {
@@ -207,13 +207,13 @@ function matrixOperation(oper,var1,var2) {
    } catch { // else it is a variable
       mat2 = getMatrix(var2).matrix;
       expr2 = getMatrix(var2).expr;
-   } 
-   
+   }
+
    switch(oper){
       case "+":
-         return {matrix: mat1.plus(mat2) , expr: expr1 + "+" + expr2 }; 
+         return {matrix: mat1.plus(mat2) , expr: expr1 + "+" + expr2 };
       case "-":
-         return {matrix: mat1.minus(mat2) , expr : expr1 + "-" + expr2}; 
+         return {matrix: mat1.minus(mat2) , expr : expr1 + "-" + expr2};
       case "*":
          return num1_scalar ?  {matrix: mat2.times(num1), expr: num1 + "\\," + expr2} :  {matrix: mat1.times(mat2), expr: expr1 + "\\," + expr2}
       case "^":
@@ -221,18 +221,18 @@ function matrixOperation(oper,var1,var2) {
         if(isNaN(pow)) {
           throw var2 + " is not an integer";
         }
-        return {matrix: mat1.power(pow) , expr: expr1 + "^" + pow}; 
+        return {matrix: mat1.power(pow) , expr: expr1 + "^" + pow};
    }
 }
 
 function parseInput(str)
 {
-  var output; 
+  var output;
 
    try
    {
       if (unaryRE.test(str))
-      { 
+      {
          var oper = unaryRE.exec(str)[1];
          var arg = unaryRE.exec(str)[2];
          if (!unary_opers.includes(oper)) {
@@ -250,23 +250,22 @@ function parseInput(str)
             throw "The function " + ops[1] + " is not defined."
          }
          switch(ops[1]) {
-         case "aug": 
+         case "aug":
             var mat1 = getMatrix(ops[2]);
             var mat2 = getMatrix(ops[3]);
-            var res = mat1.augment(mat2); 
+            var res = mat1.augment(mat2);
             output = {
-               matrix: res, 
+               matrix: res,
                expr : "\\mbox{aug(}" + ops[2] + "," + ops[3] + ")",
-               //as_string: "\\[\\mbox{aug(}" + ops[2] + "," + ops[3] + ")=" +res.toLaTeX() + "\\]"
             };
          }
-         console.log(ops);
+
       } else  {
-         throw "I don't understand the operation: " + str; 
+         throw "I don't understand the operation: " + str;
       }
 
       results[results.length] = {matrix: output.matrix, expr: output.expr};
-      var tableRow = "<tr><td class='lcol'>" + 
+      var tableRow = "<tr><td class='lcol'>" +
          "\\[ " + decorateVariable(output.expr) + "=" + output.matrix.toLaTeX() + "\\]</td><td class='rcol'> ["+ currentStep + "] </td></tr>";
       currentStep++;
 
@@ -279,12 +278,9 @@ function parseInput(str)
       alert(er);
       return;
    }
-
-
 }
 
-function editMatrix()
-{
+function editMatrix() {
    var num = $j(this).data("matrix");
    matrix_modal.show();
    var matrixName = storage.keys()[num];
@@ -293,7 +289,6 @@ function editMatrix()
 }
 
 function deleteMatrix() {
-   console.log("deleting....")
    var num = $j(this).data("matrix");
    var varname = storage.keys()[num];
    localStorage.removeItem(`matrix-${varname}`);
