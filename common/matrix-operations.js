@@ -158,50 +158,64 @@ Matrix.prototype.toDecimal = function()
   return mat;
 }
 
+/* checks if the given vector is an integer multiple of a column of the identity matrix.
+Also, returns the location and value of the non-zero element. */
+function isIdentityMultiple(vect) {
+  const abssum = vect.reduce((sum,v) => new Add(sum, v.abs()),Integer.ZERO);
+  const absmax = vect.reduce((max,v) => v.abs().compareTo(max)> Integer.ZERO ? v.abs() : max , Integer.ZERO);
+  if (! abssum.equals(absmax)) return {is_identity: false};
+  for(var j = 0; j< vect.length; j++) {
+    if(vect[j].abs().equals(absmax)) {
+      return {
+        is_identity: true,
+        location: j+1,
+        value: vect[j]
+      };
+    }
+  }
+  return { is_identity: false};
+}
+
+Matrix.prototype.column = function(col) {
+  const column = [];
+  var m = this.arr.length;
+  for(var j = 0; j< m; j++) {
+    column.push(this.arr[j][col-1]);
+  }
+  return column;
+}
+
+
 
 /* This is how matrix operations are performed.  The matrix operations include:
   Row operations, pivots and converting to Decimals. */
 
 Matrix.prototype.operate = function (rowOp)
 {
-  if (rowOp instanceof RowSwap)
-  {
-    return this.swapRows(rowOp.row1-1,rowOp.row2-1);
-  } else if (rowOp instanceof RowMultiply)
-  {
-    return this.multiplyRowBy(rowOp.row-1,rowOp.factor);
-
-  } else if (rowOp instanceof RowMultiplyAndAdd)
-  {
+  if (rowOp instanceof RowSwap) return this.swapRows(rowOp.row1-1,rowOp.row2-1);
+  else if (rowOp instanceof RowMultiply) return this.multiplyRowBy(rowOp.row-1,rowOp.factor);
+  else if (rowOp instanceof RowMultiplyAndAdd) {
     if (!((rowOp.row1==rowOp.row3)||(rowOp.row2==rowOp.row3)))
       throw "illegal row input row cannot equal " + rowOp.row3;
 
       return this.multiplyRowBy(rowOp.row1-1,rowOp.factor1,rowOp.row2-1,
         rowOp.factor2,rowOp.row3-1);
-  } else if (rowOp instanceof Pivot)
-  {
-    if (this.arr[rowOp.row-1][rowOp.col-1].equals(Integer.ZERO))
-       throw "The matrix cannot be pivoted about a 0 entry.";
+  } else if (rowOp instanceof Pivot) {
+    if (this.arr[rowOp.row-1][rowOp.col-1].equals(Integer.ZERO)) throw "The matrix cannot be pivoted about a 0 entry.";
     return this.pivot(rowOp.row-1,rowOp.col-1);
-
   } else if (rowOp instanceof PivotPreserveIntegers)
   {
-    if (this.arr[rowOp.row-1][rowOp.col-1].equals(Integer.ZERO))
-       throw "The matrix cannot be pivoted about a 0 entry.";
+    if (this.arr[rowOp.row-1][rowOp.col-1].equals(Integer.ZERO)) throw "The matrix cannot be pivoted about a 0 entry.";
     return this.pivotPreserveIntegers(rowOp.row-1,rowOp.col-1);
 
-  } else if (rowOp instanceof ToDecimal)
-  {
-    return this.toDecimal();
-  }
+  } else if (rowOp instanceof ToDecimal)return this.toDecimal();
   return;
 }
 
 /* The following is a pivot about the given row and column resulting in a column which is a column
   of the identity matrix. */
 
-Matrix.prototype.pivot = function (row,col)
-{
+Matrix.prototype.pivot = function (row,col) {
   var m = this.clone();
 
   var factor = new Divide(new Integer(1),this.arr[row][col])
@@ -219,16 +233,43 @@ Matrix.prototype.pivot = function (row,col)
   in the matrix.  The resulting column will be a positive multiple of a column of the
   identity matrix.  */
 
-Matrix.prototype.pivotPreserveIntegers = function (row,col)
-{
+Matrix.prototype.pivotPreserveIntegers = function (row,col) {
   let m = this.clone();
-  if (m.SMMultiplier === undefined) m.SMMultiplier = Integer.ONE;
 
+  /* This needs m.SMMultiplier to be defined.  If not, try to detect it.
+  This goes through all columns to determine if each is a multiple of the identity
+  Matrix or not.  If so, make sure that all columns are covered.  Store the
+  multiple of the columns. */
+
+  if (m.SMMultiplier === undefined) {
+    const cols = [];
+    let mult = undefined;
+    // Common error
+    const err = 'When using Simplex Method mode, you must '
+    'have all basic columns the same multiple of a row of the identity matrix.';
+    for(let j=0; j< this.arr[0].length; j++) {
+      const c = isIdentityMultiple(m.column(j+1));
+      if (c.is_identity) {
+        if (mult == undefined) mult = c.value
+        else if (!c.value.equals(mult)) throw err;
+        cols.push(c);
+      }
+      console.log(mult);
+    }
+    // Check that every location is filled.
+    const seq = new Array(m.arr.length).fill(1).map( (_, i) => i+1 );
+    if (! (seq.length == cols.length && cols.map((c) => c.location).sort().every((v,i) => v == seq[i])) )
+      throw err;
+    m.SMMultiplier = mult;
+  }
+  const mult = m.SMMultiplier;
+
+  // This is a standard pivot, keeping the pivoted number throughout the matrix.
   if (m.arr[row][col].compareTo(Integer.ZERO)<0) m = m.multiplyRowBy(row, new Integer(-1));
   for(var k = 0; k < this.arr.length; k++)
     if (k != row)
-      m = m.multiplyRowBy(row,new Multiply(new Integer(-1), new Divide(m.arr[k][col], this.SMMultiplier)),
-                          k,new Divide(new Multiply(m.arr[row][col]), this.SMMultiplier));
+      m = m.multiplyRowBy(row,new Multiply(new Integer(-1), new Divide(m.arr[k][col], mult)),
+                          k,new Divide(new Multiply(m.arr[row][col]), mult));
 
   m.SMMultiplier = m.arr[row][col];
 
