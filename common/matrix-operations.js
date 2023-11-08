@@ -245,7 +245,7 @@ Matrix.prototype.pivotPreserveIntegers = function (row,col) {
     const cols = [];
     let mult = undefined;
     // Common error
-    const err = 'When using Simplex Method mode, you must '
+    const err = 'When using Simplex Method mode, you must ' +
     'have all basic columns the same multiple of a row of the identity matrix.';
     for(let j=0; j< this.arr[0].length; j++) {
       const c = isIdentityMultiple(m.column(j+1));
@@ -258,8 +258,17 @@ Matrix.prototype.pivotPreserveIntegers = function (row,col) {
     }
     // Check that every location is filled.
     const seq = new Array(m.arr.length).fill(1).map( (_, i) => i+1 );
-    if (! (seq.length == cols.length && cols.map((c) => c.location).sort().every((v,i) => v == seq[i])) )
-      throw err;
+    let valid = true;
+    for(let j=0; j<cols.length; j++) {
+      const loc = seq.findIndex(i => i==cols[j].location);
+      if (loc> -1) {
+        seq.splice(loc,1);
+      } else {
+        throw err;
+      }
+    }
+    // if (! (seq.length == cols.length && cols.map((c) => c.location).sort().every((v,i) => v == seq[i])) )
+    //   throw err;
     m.SMMultiplier = mult;
   }
   const mult = m.SMMultiplier;
