@@ -344,7 +344,7 @@ Matrix.prototype.clone = function()
   for(i=0; i < this.arr.length; i++)
     for(j=0; j< this.arr[i].length; j++)
     m.arr[i][j] = this.arr[i][j];
-
+  m.SMMultiplier = this.SMMultiplier;
   return m;
 }
 
