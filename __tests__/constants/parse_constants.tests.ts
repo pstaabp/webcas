@@ -1,9 +1,9 @@
 import {describe, expect, test} from '@jest/globals';
-import {Parser} from '/Users/pstaab/code/webcas/src/constants/parser.ts';
 import {Integer} from '/Users/pstaab/code/webcas/src/constants/integer.ts';
 import {Rational} from '/Users/pstaab/code/webcas/src/constants/rational.ts';
 import {Real} from '/Users/pstaab/code/webcas/src/constants/real.ts';
 import {Complex} from '/Users/pstaab/code/webcas/src/constants/complex.ts';
+import {Parser} from '/Users/pstaab/code/webcas/src/constants/parser.ts';
 
 describe('Parse Integers', () => {
   test('1 is an integer', () => { expect(Parser.parseConstant("1").equals(new Integer(1))).toBe(true); });

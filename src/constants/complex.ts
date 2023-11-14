@@ -1,5 +1,5 @@
-import { Constant, constRe } from './abstract_constant';
-import { Parser } from './parser';
+import { Constant } from './abstract_constant';
+import { Parser, constRe } from './parser';
 import { Integer } from './integer';
 import { Real, RealConstant } from './real';
 import { Rational } from './rational';
@@ -18,45 +18,34 @@ export class Complex extends Constant {
       if (!constRe.complex.test(arg1)) throw arg1 + " is not a complex number";
       const match = arg1.match(constRe.complex);
       if (match) {
-        const c1 = Parser.parseConstant(match[2]);
-        if (c1 instanceof Integer|| c1 instanceof Real || c1 instanceof Rational) {
-          this._real = c1;
-          } else {
-            throw new Error ("This shouldn't occur.");
-          }
-          const c2 = Parser.parseConstant(match[4]);
-        if (c2 instanceof Integer|| c2 instanceof Real || c2 instanceof Rational) {
-          this._imag = c2;
-          } else {
-            throw new Error ("This shouldn't occur.");
-          }
+        this._real = Parser.parseRealConstant(match[2]);
+        this._imag = Parser.parseRealConstant(match[4]);
       }
       if (match != undefined && match[3] == '-') this._imag.times('-1');
-    }  else if (typeof arg1 !== 'string' && typeof arg1 !== undefined) {
-        if (arg1 instanceof Integer|| arg1 instanceof Real || arg1 instanceof Rational) {
+    }  else {
+      if (arg1 instanceof Integer|| arg1 instanceof Real || arg1 instanceof Rational) {
         this._real = arg1;
-        } else {
-          throw new Error ("This shouldn't occur.");
-        }
-        if (arg2 instanceof Integer|| arg2 instanceof Real || arg2 instanceof Rational) {
-          this._imag = arg2;
-          } else {
-            throw new Error ("This shouldn't occur.");
-          }
       } else {
-      throw "Constructor either must be a string or a pair of numbers";
-    }
+        this._real = Parser.parseRealConstant(`${arg1}`);
+      }
+          if (arg2 instanceof Integer|| arg2 instanceof Real || arg2 instanceof Rational) {
+          this._imag = arg2;
+        } else {
+          this._imag = Parser.parseRealConstant(`${arg2}`);
+        }
+      }
+      console.log(this.toString());
   }
 
   get real(): RealConstant { return this._real; }
   get imag(): RealConstant { return this._imag; }
 
-  toString() { return `${this._real}+${this._imag}`;}
+  toString() { return `${this._real}+${this._imag}i`;}
   toLaTeX() { return this.toString();}
 
   equals(num: Constant): boolean {
     if (num instanceof Complex) {
-      return num.real === this._real && num.imag === this._imag;
+      return num.real.equals(this._real) && num.imag.equals(this._imag);
     }
     return false;
   }
@@ -67,15 +56,13 @@ export class Complex extends Constant {
   plus(str: string): Complex;
   plus(num: Constant | RealConstant | Complex | string): Complex {
     if (typeof num === 'string') return this.plus(Parser.parseConstant(num));
-    if (num instanceof Integer || num instanceof Real || num instanceof Rational) {
-      const r: Integer | Rational | Real = this.real.plus(num);
-      return new Complex(r, this.imag);
-    } else if (num instanceof Complex) {
-      const r: RealConstant = this.real.plus(num);
-
-      return new Complex(r, num.imag.plus(this._real));
+    if (num instanceof Integer || num instanceof Real || num instanceof Rational)
+       return new Complex(this.real.plus(num), this.imag);
+    else if (num instanceof Complex) {
+      return new Complex(this.real.plus(num.real),this.imag.plus(num.imag));
+    } else {
+    throw new Error("This line shouldn't be reached.");
     }
-    else throw new Error("This line shouldn't be reached.");
   }
 
   minus(num: RealConstant): Complex;

@@ -1,9 +1,8 @@
-import { Constant, constRe } from './abstract_constant';
-import { Parser } from './parser';
-import { Complex } from './complex.ts';
-import { Rational } from './rational.ts';
-import { Real, RealConstant } from './real.ts';
-
+import { Constant } from './abstract_constant';
+import { Complex } from './complex';
+import { Rational } from './rational';
+import { Real, RealConstant } from './real';
+import { Parser, constRe } from './parser';
 
 export class Integer extends Constant {
   private _value: bigint;
@@ -28,44 +27,44 @@ export class Integer extends Constant {
   plus(num: Complex): Complex;
   plus(str: string): Constant;
   plus(num: Constant): Constant;
-  plus(num: RealConstant | Complex | string): Constant {
+  plus(arg: Constant | RealConstant | Complex | string): Constant {
+    let num = typeof arg === 'string' ? Parser.parseConstant(arg) : arg;
     if (num instanceof Integer) return new Integer(num.value + this._value);
     else if (num instanceof Real) return new Real(num.value + Number(this._value));
     else if (num instanceof Rational) return new Rational(num.numer + this._value*num.denom, num.denom);
     else if (num instanceof Complex) return new Complex(this.plus(num.real), num.imag);
-    else if (typeof num === 'string') return this.plus(Parser.parseConstant(num));
     else throw new Error("This line shouldn't be reached.");
   }
 
   minus(num: RealConstant): RealConstant;
   minus(num: Complex): Complex;
   minus(str: string): Constant;
-  minus(num: RealConstant | Complex | string): Constant {
-    if (num instanceof Integer) return new Integer(num.value - this._value);
-    else if (num instanceof Real) return new Real(num.value - Number(this._value));
-    else if (num instanceof Rational) return new Rational(num.numer - this._value*num.denom, num.denom);
+  minus(arg: RealConstant | Complex | string): Constant {
+    let num = typeof arg === 'string' ? Parser.parseConstant(arg) : arg;
+    if (num instanceof Integer) return new Integer(this._value - num._value);
+    else if (num instanceof Real) return new Real(Number(this._value) - num.value);
+    else if (num instanceof Rational) return new Rational(this._value*num.denom - num.denom, num.denom);
     else if (num instanceof Complex) return new Complex(this.minus(num.real), num.imag);
-    else if (typeof num === 'string') return this.minus(Parser.parseConstant(num));
     else throw new Error("This line shouldn't be reached.");
   }
 
   times(num: RealConstant): RealConstant;
   times(num: Complex): Complex;
   times(str: string): Constant;
-  times(num: RealConstant | Complex | string): Constant {
+  times(arg: RealConstant | Complex | string): Constant {
+    const num = typeof arg === 'string' ? Parser.parseConstant(arg) : arg;
     if (num instanceof Integer) return new Integer(num.value * this._value);
     else if (num instanceof Real) return new Real(num.value * Number(this._value));
     else if (num instanceof Rational) return new Rational(num.numer *this._value, num.denom);
     else if (num instanceof Complex) {
-      const r: Integer | Real | Rational = this.real.times(num);
+      const r: RealConstant = this.times(num.real);
       return new Complex(r, num.imag);
-    } else if (typeof num === 'string') return this.times(Parser.parseConstant(num));
-    else throw new Error("This line shouldn't be reached.");
+    } else throw new Error("This line shouldn't be reached.");
   }
 
 
   static gcd(...nums: number[]|  bigint[] | Integer[]): bigint {
-    // If argments are of type Integer, convert to BigInts.
+    // If argments are of type Integer or number, convert to BigInts.
     const values: bigint[] = nums.map(n => n instanceof Integer ? n.value : typeof n === "number" ? BigInt(n) :  n);
     if (values.length == 1) {
       return values[0];
@@ -79,7 +78,6 @@ export class Integer extends Constant {
         b = t;
       }
       return a;
-      // return values[1] === BigInt(0) ? values[0] : Integer.gcd(values[1], values[0] % values[1]);
     } else if (values.length %2 == 0) {
       const arr = Array(values.length/2).fill(0n);
       for (let i= 0; i< values.length/2; i++){
