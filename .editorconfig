@@ -1,0 +1,9 @@
+[*]
+charset = utf-8
+insert_final_newline = true
+end_of_line = lf
+indent_style = tab
+indent_size = 2
+single_quote = true
+# use_tabs = true
+max_line_length = 120
