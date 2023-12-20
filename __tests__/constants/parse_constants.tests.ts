@@ -1,9 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
-import { Integer } from 'constants/integer.ts';
-import { Rational } from 'constants/rational.ts';
-import { Real } from 'constants/real.ts';
-import { Complex } from 'constants/complex.ts';
-import { Parser } from 'constants/parser.ts';
+import { Integer, Rational, Real, Complex } from '../../src/constants/all_constants';
+import { Parser } from '../../src/constants/constant_parser';
+import { NamedConstant } from '../../src/constants/all_constants';
 
 describe('Parse Integers', () => {
 	test('1 is an integer', () => {
@@ -192,5 +190,19 @@ describe('Parse complex numbers', () => {
 
 	test('1/2+3/5i is a complex', () => {
 		expect(Parser.parseConstant('1/2+3/5i')).toStrictEqual(new Complex(new Rational(1, 2), new Rational(3, 5)));
+	});
+});
+
+describe('parse constants', () => {
+	test('parse pi', () => {
+		expect(Parser.parseNamedConstant('pi')).toStrictEqual(new NamedConstant('pi'));
+	});
+	test('parse e', () => {
+		expect(Parser.parseNamedConstant('e')).toStrictEqual(new NamedConstant('e'));
+	});
+	test('parse fred', () => {
+		expect(() => {
+			Parser.parseNamedConstant('fred');
+		}).toThrow('The constant fred is not defined.');
 	});
 });

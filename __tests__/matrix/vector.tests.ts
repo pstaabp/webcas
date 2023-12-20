@@ -1,7 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
-import { ColumnVector, RowVector, Matrix } from 'matrix/matrix.ts';
-import { Integer } from 'constants/integer.ts';
-import { Rational } from 'constants/rational.ts';
+import { ColumnVector, RowVector, Matrix } from '../../src/matrix/matrix';
+import { Integer, Rational } from '../../src/constants/all_constants';
 
 describe('ColumnVector constructor', () => {
 	test('create column vectors of ints', () => {

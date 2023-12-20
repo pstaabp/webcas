@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
-import { Matrix, ColumnVector, RowVector } from 'matrix/matrix.ts';
-import { Integer } from 'constants/integer.ts';
+import { Matrix, ColumnVector, RowVector } from '../../src/matrix/matrix';
+import { Integer } from '../../src/constants/all_constants';
 
 describe('get and set elements of a matrix', () => {
 	const mat1 = new Matrix(`1 2 3 4

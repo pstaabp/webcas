@@ -3,12 +3,12 @@ import {
 	MultiplyRowAndAdd,
 	RowSwap,
 	MultiplyRow,
-	RowOperation,
+	ElementaryRowOperation,
 	Pivot,
 	PivotPreserveIntegers,
-} from 'matrix/row_operation.ts';
-import { Integer } from 'constants/integer.ts';
-import { Rational } from 'constants/rational.ts';
+} from '../../src/matrix/row_operation';
+import { Integer, Rational } from '../../src/constants/all_constants';
+import { Matrix } from '../../src/matrix/matrix';
 
 describe('construct Row Swap', () => {
 	const rs1 = new RowSwap(1, 2);
@@ -16,7 +16,7 @@ describe('construct Row Swap', () => {
 		expect(rs1 instanceof RowSwap).toBe(true);
 	});
 	test('construct row swap', () => {
-		expect(rs1 instanceof RowOperation).toBe(true);
+		expect(rs1 instanceof ElementaryRowOperation).toBe(true);
 	});
 
 	test('detect first row of row swap', () => {
@@ -67,7 +67,7 @@ describe('construct Multiply Row', () => {
 		expect(mrow instanceof MultiplyRow).toBe(true);
 	});
 	test('construct multiply row', () => {
-		expect(mrow instanceof RowOperation).toBe(true);
+		expect(mrow instanceof ElementaryRowOperation).toBe(true);
 	});
 
 	test('detect scalar of multiply row', () => {
@@ -101,7 +101,7 @@ describe('construct Multiply Row and Add', () => {
 		expect(mrow instanceof MultiplyRowAndAdd).toBe(true);
 	});
 	test('construct multiply row', () => {
-		expect(mrow instanceof RowOperation).toBe(true);
+		expect(mrow instanceof ElementaryRowOperation).toBe(true);
 	});
 
 	test('detect first scalar of multiply row and add', () => {
@@ -132,7 +132,7 @@ describe('construct 5-arg Multiply Row and Add', () => {
 		expect(mrow instanceof MultiplyRowAndAdd).toBe(true);
 	});
 	test('construct multiply row', () => {
-		expect(mrow instanceof RowOperation).toBe(true);
+		expect(mrow instanceof ElementaryRowOperation).toBe(true);
 	});
 
 	test('detect first scalar of multiply row and add', () => {
@@ -220,8 +220,8 @@ describe('construct Pivot ops', () => {
 	test('Pivot(1,2) is a Pivot', () => {
 		expect(new Pivot(1, 2) instanceof Pivot).toBe(true);
 	});
-	test('Pivot(1,2) is a RowOperation', () => {
-		expect(new Pivot(1, 2) instanceof RowOperation).toBe(true);
+	test('Pivot(1,2) is a ElementaryRowOperation', () => {
+		expect(new Pivot(1, 2) instanceof ElementaryRowOperation).toBe(true);
 	});
 	test('Pivot(1,2) stores correct info.', () => {
 		const p = new Pivot(1, 2);
@@ -232,8 +232,8 @@ describe('construct Pivot ops', () => {
 	test('piv(1,2) is a PivotPreserveIntegers', () => {
 		expect(new PivotPreserveIntegers(1, 2) instanceof PivotPreserveIntegers).toBe(true);
 	});
-	test('piv(1,2) is a RowOperation', () => {
-		expect(new PivotPreserveIntegers(1, 2) instanceof RowOperation).toBe(true);
+	test('piv(1,2) is a ElementaryRowOperation', () => {
+		expect(new PivotPreserveIntegers(1, 2) instanceof ElementaryRowOperation).toBe(true);
 	});
 	test('piv(1,2) stores correct info.', () => {
 		const p = new PivotPreserveIntegers(1, 2);
@@ -244,57 +244,57 @@ describe('construct Pivot ops', () => {
 
 describe('parsing correct row swaps', () => {
 	test('S12', () => {
-		expect(RowOperation.parse('S12')).toStrictEqual(new RowSwap(1, 2));
+		expect(ElementaryRowOperation.parse('S12')).toStrictEqual(new RowSwap(1, 2));
 	});
 	test('R1<->R2', () => {
-		expect(RowOperation.parse('R1<->R2')).toStrictEqual(new RowSwap(1, 2));
+		expect(ElementaryRowOperation.parse('R1<->R2')).toStrictEqual(new RowSwap(1, 2));
 	});
 	test('r1<->r2', () => {
-		expect(RowOperation.parse('r1<->r2')).toStrictEqual(new RowSwap(1, 2));
+		expect(ElementaryRowOperation.parse('r1<->r2')).toStrictEqual(new RowSwap(1, 2));
 	});
 });
 
 describe('parsing correct row multiplications', () => {
 	test('2R1->R1', () => {
-		expect(RowOperation.parse('2R1->R1')).toStrictEqual(new MultiplyRow(new Integer(2), 1));
+		expect(ElementaryRowOperation.parse('2R1->R1')).toStrictEqual(new MultiplyRow(new Integer(2), 1));
 	});
 	test('2r1->r1', () => {
-		expect(RowOperation.parse('2r1->r1')).toStrictEqual(new MultiplyRow(new Integer(2), 1));
+		expect(ElementaryRowOperation.parse('2r1->r1')).toStrictEqual(new MultiplyRow(new Integer(2), 1));
 	});
 	test('2R1', () => {
-		expect(RowOperation.parse('2R1')).toStrictEqual(new MultiplyRow(new Integer(2), 1));
+		expect(ElementaryRowOperation.parse('2R1')).toStrictEqual(new MultiplyRow(new Integer(2), 1));
 	});
 	test('2r1', () => {
-		expect(RowOperation.parse('2r1')).toStrictEqual(new MultiplyRow(new Integer(2), 1));
+		expect(ElementaryRowOperation.parse('2r1')).toStrictEqual(new MultiplyRow(new Integer(2), 1));
 	});
 
 	test('-2R1', () => {
-		expect(RowOperation.parse('-2R1')).toStrictEqual(new MultiplyRow(new Integer(-2), 1));
+		expect(ElementaryRowOperation.parse('-2R1')).toStrictEqual(new MultiplyRow(new Integer(-2), 1));
 	});
 	test('-2r1', () => {
-		expect(RowOperation.parse('-2r1')).toStrictEqual(new MultiplyRow(new Integer(-2), 1));
+		expect(ElementaryRowOperation.parse('-2r1')).toStrictEqual(new MultiplyRow(new Integer(-2), 1));
 	});
 
 	test('(2/3)R1', () => {
-		expect(RowOperation.parse('(2/3)R1')).toStrictEqual(new MultiplyRow(new Rational(2, 3), 1));
+		expect(ElementaryRowOperation.parse('(2/3)R1')).toStrictEqual(new MultiplyRow(new Rational(2, 3), 1));
 	});
 });
 
 describe('parsing correct row combinations', () => {
 	test('2R1+R3->R3', () => {
-		expect(RowOperation.parse('2R1+R3->R3')).toStrictEqual(
+		expect(ElementaryRowOperation.parse('2R1+R3->R3')).toStrictEqual(
 			new MultiplyRowAndAdd(new Integer(2), 1, new Integer(1), 3, 3)
 		);
 	});
 
 	test('(2/3)R1+R3->R3', () => {
-		expect(RowOperation.parse('(2/3)R1+R3->R3')).toStrictEqual(
+		expect(ElementaryRowOperation.parse('(2/3)R1+R3->R3')).toStrictEqual(
 			new MultiplyRowAndAdd(new Rational(2, 3), 1, new Integer(1), 3, 3)
 		);
 	});
 
 	test('2R1-R3->R3', () => {
-		expect(RowOperation.parse('2R1-R3->R3')).toStrictEqual(
+		expect(ElementaryRowOperation.parse('2R1-R3->R3')).toStrictEqual(
 			new MultiplyRowAndAdd(new Integer(2), 1, new Integer(-1), 3, 3)
 		);
 	});
@@ -303,60 +303,60 @@ describe('parsing correct row combinations', () => {
 describe('parsing incorrect row operations', () => {
 	test('S11', () => {
 		expect(() => {
-			RowOperation.parse('S11');
+			ElementaryRowOperation.parse('S11');
 		}).toThrow('The two rows must be different.');
 	});
 	test('R2<->R2', () => {
 		expect(() => {
-			RowOperation.parse('R2<->R2');
+			ElementaryRowOperation.parse('R2<->R2');
 		}).toThrow('The two rows must be different.');
 	});
 	test('r1<->r1', () => {
 		expect(() => {
-			RowOperation.parse('r1<->r1');
+			ElementaryRowOperation.parse('r1<->r1');
 		}).toThrow('The two rows must be different.');
 	});
 	test('2R1->R2', () => {
 		expect(() => {
-			RowOperation.parse('2R1->R2');
+			ElementaryRowOperation.parse('2R1->R2');
 		}).toThrow('The two rows must be the same.');
 	});
 	test('2r1->r2', () => {
 		expect(() => {
-			RowOperation.parse('2r1->r2');
+			ElementaryRowOperation.parse('2r1->r2');
 		}).toThrow('The two rows must be the same.');
 	});
 });
 
 describe('parse pivots correctly', () => {
 	test('pivot(1,2)', () => {
-		expect(RowOperation.parse('pivot(1,2)')).toStrictEqual(new Pivot(1, 2));
+		expect(ElementaryRowOperation.parse('pivot(1,2)')).toStrictEqual(new Pivot(1, 2));
 	});
 	test('piv(1,2)', () => {
-		expect(RowOperation.parse('piv(1,2)')).toStrictEqual(new PivotPreserveIntegers(1, 2));
+		expect(ElementaryRowOperation.parse('piv(1,2)')).toStrictEqual(new PivotPreserveIntegers(1, 2));
 	});
 });
 
 describe('parse pivot throws errors', () => {
 	test('pivot(1.2,2)', () => {
 		expect(() => {
-			RowOperation.parse('pivot(1.1,2)');
+			ElementaryRowOperation.parse('pivot(1.1,2)');
 		}).toThrow('Row must be a positive integer');
 	});
 	test('pivot(1,2.5)', () => {
 		expect(() => {
-			RowOperation.parse('pivot(1,2.5)');
+			ElementaryRowOperation.parse('pivot(1,2.5)');
 		}).toThrow('Column must be a positive integer');
 	});
 
 	test('piv(0,2)', () => {
 		expect(() => {
-			RowOperation.parse('piv(0,2)');
+			ElementaryRowOperation.parse('piv(0,2)');
 		}).toThrow('Row must be a positive integer');
 	});
 	test('piv(1,-3)', () => {
 		expect(() => {
-			RowOperation.parse('pivot(1,2.5)');
+			ElementaryRowOperation.parse('pivot(1,2.5)');
 		}).toThrow('Column must be a positive integer');
 	});
-})
+});

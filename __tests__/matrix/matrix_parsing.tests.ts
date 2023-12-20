@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { Matrix } from 'matrix/matrix.ts';
+import { Matrix } from '../../src/matrix/matrix';
 
 describe('constructing matrices from strings', () => {
 	const m1 = `1 2 3 4

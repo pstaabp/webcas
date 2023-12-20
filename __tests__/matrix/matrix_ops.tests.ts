@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
-import { Matrix } from 'matrix/matrix';
-import { Integer } from 'constants/integer';
-import { Rational } from 'constants/rational';
+import { Matrix, RowVector } from '../../src/matrix/matrix';
+import { PivotPreserveIntegers, AddRowToTableau } from '../../src/matrix/row_operation';
+import { Integer, Rational } from '../../src/constants/all_constants';
 
 describe('Matrix Addition/Subtraction', () => {
 	const A = new Matrix(`1 2 3 4; 5 6 7 8;3 4 5 6`);
@@ -110,20 +110,50 @@ describe('Row combinations', () => {
 describe('pivots', () => {
 	const A = new Matrix(`1 2 3 4; 5 6 7 8;3 4 5 6`);
 	const A0 = A.clone();
+	A0.checkTableau();
 	const B = new Matrix(`0 4/5 8/5 12/5; 1 6/5 7/5 8/5; 0 2/5 4/5 6/5`);
 	const C = new Matrix('0 4 8 12; 5 6 7 8; 0 2 4 6');
+	C.SMmultiplier = new Integer(5);
 
 	const A1 = new Matrix('1 2 -3 4; 5 6 7 8;3 4 5 6');
+	A1.checkTableau();
 	const C1 = new Matrix('-1 -2 3 -4; 22 32 0 52; 14 22 0 38');
+	C1.SMmultiplier = new Integer(3);
 	test('pivot(2,1)', () => {
 		expect(A.pivot(2, 1)).toStrictEqual(B);
 	});
 
 	test('piv(2,1)', () => {
-		expect(A0.pivotPreserveIntegers(2,1)).toStrictEqual(C);
-	})
+		expect(A0.pivotPreserveIntegers(2, 1)).toStrictEqual(C);
+	});
 
 	test('piv(1,3) on a negative integer', () => {
-		expect(A1.pivotPreserveIntegers(1,3)).toStrictEqual(C1);
-	})
+		expect(A1.pivotPreserveIntegers(1, 3)).toStrictEqual(C1);
+	});
+});
+
+describe('test a larger matrix for piv', () => {
+	const T = new Matrix('17 32 1 0 0 136;	4 4 0 1 0 25; -4 -5 0 0 1 0');
+	T.SMmultiplier = new Integer(1);
+	const T1 = new Matrix('0 60 4 -17 0 119; 4 4 0 1 0 25; 0 -4 0 4 4 100');
+	T1.SMmultiplier = new Integer(4);
+	const T2 = new Matrix('0 60 4 -17 0 119; 60 0 -4 32 0 256; 0 0 4 43 60 1619');
+	T2.SMmultiplier = new Integer(60);
+	test('piv(2,1)', () => {
+		expect(T.operate(new PivotPreserveIntegers(2, 1))).toStrictEqual(T1);
+	});
+	test('piv(1,2)', () => {
+		expect(T1.operate(new PivotPreserveIntegers(1, 2))).toStrictEqual(T2);
+	});
+});
+
+describe('test add row to tableau', () => {
+	const T = new Matrix('0 60 4 -17 0 119; 60 0 -4 32 0 256; 0 0 4 43 60 1619');
+	T.checkTableau();
+	const T1 = new Matrix('0 60 4 -17 0 0 119; 60 0 -4 32 0 0 256; 0 0 -4 -43 60 0 -59; 0 0 4 43 0 60 1619');
+	T1.SMmultiplier = new Integer(60);
+	const addRow = new AddRowToTableau(new RowVector([0, 0, -4, -43, 60, 0, -59]));
+	test('add row to tableau', () => {
+		expect(T.operate(addRow)).toStrictEqual(T1);
+	});
 });

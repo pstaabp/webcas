@@ -1,8 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { Integer } from 'constants/integer.ts';
-import { Rational } from 'constants/rational.ts';
-import { Real } from 'constants/real.ts';
-import { Complex } from 'constants/complex.ts';
+import { Integer, Rational, Real, Complex } from '../../src/constants/all_constants';
 
 describe('constructor', () => {
 	const i1 = new Integer(1);
@@ -147,5 +144,31 @@ describe('gcd of 3 integers', () => {
 describe('gcd of 4 integers', () => {
 	test('gcd(24,12,16,40) to equal 4', () => {
 		expect(Integer.gcd(24, 12, 16, 40)).toBe(4n);
+	});
+});
+
+describe('check absolute value', () => {
+	test('abs(-2) = 2', () => {
+		expect(new Integer(-2).abs()).toStrictEqual(new Integer(2));
+	});
+	test('abs(2) = 2', () => {
+		expect(new Integer(2).abs()).toStrictEqual(new Integer(2));
+	});
+});
+
+describe('check unary minus', () => {
+	test('(2).neg = -2', () => {
+		expect(new Integer(-2).neg()).toStrictEqual(new Integer(2));
+	});
+	test('(-2).neg = 2', () => {
+		expect(new Integer(2).neg()).toStrictEqual(new Integer(-2));
+	});
+});
+
+describe('abs sum of integers', () => {
+	const arr = [new Integer(1), new Integer(-2), new Integer(3)];
+	const abs_sum = arr.reduce((m: Integer, v: Integer, i, array) => v.abs().plus(m) as Integer);
+	test('abs sum', () => {
+		expect(abs_sum).toStrictEqual(new Integer(6));
 	});
 });

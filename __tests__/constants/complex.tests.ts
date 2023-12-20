@@ -1,8 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { Complex } from 'constants/complex.ts';
-import { Rational } from 'constants/rational.ts';
-import { Integer } from 'constants/integer.ts';
-import { Real } from 'constants/real.ts';
+import { Complex, Rational, Integer, Real } from '../../src/constants/all_constants';
 
 describe('constructor with numbers', () => {
 	const c1 = new Complex(1, 2);

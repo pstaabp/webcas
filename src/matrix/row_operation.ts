@@ -1,16 +1,23 @@
-import { RealConstant } from '../constants/abstract_real';
-import { Integer } from '../constants/integer';
-import { Parser, constRe } from '../constants/parser';
+import { RealConstant, Integer } from '../constants/all_constants';
+import { Parser, constRe } from '../constants/constant_parser';
+import { RowVector } from './matrix';
 
 const multAndAddRe = /(\(?(-?[\.\d+\/]*)\)?\*?[Rr](\d+)(\+|-))?\(?(-?[\.\d+\/]*)?\)?\*?[Rr](\d+)(->[rR](\d+)(.*))?/;
 const swapRe1 = /^S(\d+)(\d+)$/;
 const swapRe2 = /^[Rr](\d+)<->[Rr](\d+)$/;
 const genfunctRe = /^(\w+)\(([\d/.]+),([\d/.]+)\)$/;
 
-export abstract class RowOperation {
+// This is a general matrix operation.  This includes elementary row operations, but
+// also the addition of a row to a matrix/simplex tableau.
+export abstract class MatrixOperation {
 	constructor() {}
-
 	abstract toLaTeX(): string;
+}
+
+export abstract class ElementaryRowOperation extends MatrixOperation {
+	constructor() {
+		super();
+	}
 
 	static parse(str: string) {
 		let num1, row1, num2, row2, row3;
@@ -64,9 +71,16 @@ export abstract class RowOperation {
 
 		throw new Error('Error in Row operation');
 	}
+
+	// parse multiple row operations separated by commas.
+	static parseAll(str: string) {
+		return /piv(ot)?\(\d+,\d+\)/.test(str)
+			? [ElementaryRowOperation.parse(str)]
+			: str.split(',').map((st) => ElementaryRowOperation.parse(st));
+	}
 }
 
-export class MultiplyRow extends RowOperation {
+export class MultiplyRow extends ElementaryRowOperation {
 	private _row: number;
 	private _scalar: RealConstant;
 
@@ -89,7 +103,7 @@ export class MultiplyRow extends RowOperation {
 	}
 }
 
-export class RowSwap extends RowOperation {
+export class RowSwap extends ElementaryRowOperation {
 	private _row1: number;
 	private _row2: number;
 
@@ -114,7 +128,7 @@ export class RowSwap extends RowOperation {
 	}
 }
 
-export class MultiplyRowAndAdd extends RowOperation {
+export class MultiplyRowAndAdd extends ElementaryRowOperation {
 	private _row1: number;
 	private _row2: number;
 	private _row3: number;
@@ -176,7 +190,7 @@ export class MultiplyRowAndAdd extends RowOperation {
 	}
 }
 
-export class Pivot extends RowOperation {
+export class Pivot extends ElementaryRowOperation {
 	private _row: number;
 	private _col: number;
 
@@ -205,7 +219,7 @@ export class Pivot extends RowOperation {
 	}
 }
 
-export class PivotPreserveIntegers extends RowOperation {
+export class PivotPreserveIntegers extends ElementaryRowOperation {
 	private _row: number;
 	private _col: number;
 
@@ -231,5 +245,21 @@ export class PivotPreserveIntegers extends RowOperation {
 
 	toLaTeX(): string {
 		return `\\text{piv}(${this._row},${this._col})`;
+	}
+}
+
+export class AddRowToTableau extends MatrixOperation {
+	private _row: RowVector;
+	constructor(row: RowVector) {
+		super();
+		this._row = row;
+	}
+
+	get row(): RowVector {
+		return this._row;
+	}
+
+	toLaTeX(): string {
+		return `\\text{addRow}(${this._row.toLaTeX()})`;
 	}
 }

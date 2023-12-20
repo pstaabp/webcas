@@ -1,13 +1,21 @@
-import { Constant } from '../constants/abstract_constant';
-import { Integer } from '../constants/integer';
-import { Rational } from '../constants/rational';
-import { Parser } from '../constants/parser';
+import { Constant, Integer, Rational } from '../constants/all_constants';
+import { Parser } from '../constants/constant_parser';
+import {
+	ElementaryRowOperation,
+	MatrixOperation,
+	RowSwap,
+	MultiplyRow,
+	MultiplyRowAndAdd,
+	Pivot,
+	PivotPreserveIntegers,
+	AddRowToTableau,
+} from './row_operation';
 
 /* Matrix class that supports standard matrix operations */
 
 export class Matrix {
 	protected _arr: Constant[][];
-	private _SMmult: Constant | undefined;
+	private _SMmult: Integer;
 
 	// Create a zero matrix of size num_row by num_col
 	constructor(num_row: number, num_col: number);
@@ -18,6 +26,8 @@ export class Matrix {
 
 	constructor(arg1: number[][] | bigint[][] | Constant[][] | string | number, arg2?: number) {
 		this._arr = new Array<Constant[]>();
+		// set the multiplier to -1.  If in simplex mode, this will be overridden.
+		this._SMmult = new Integer(-1);
 		if (typeof arg1 == 'number' && typeof arg2 === 'number') {
 			// Check that arg1 and arg2 are positive integers.
 			for (let i = 0; i < arg1; i++) {
@@ -40,21 +50,24 @@ export class Matrix {
 			for (let i = 0; i < s.length; i++) {
 				const s2 = s[i].split(/\s+/);
 				var row = new Array<Constant>();
-				for (let j = 0; j < s2.length; j++) {
-					if (s2[j] != '') row[row.length] = Parser.parseConstant(s2[j]);
-				}
+				for (let j = 0; j < s2.length; j++) if (s2[j] != '') row[row.length] = Parser.parseConstant(s2[j]);
 				this._arr[i] = row;
 			}
-		} else if (Array.isArray(arg1)) {
-			for (let i = 0; i < arg1.length; i++) {
+		} else if (Array.isArray(arg1))
+			for (let i = 0; i < arg1.length; i++)
 				this._arr[i] = arg1[i].map((el) => (el instanceof Constant ? el : Parser.parseConstant(`${el}`)));
-			}
-		}
-		for (let i = 1; i < this._arr.length; i++) {
-			if (this._arr[0].length != this._arr[i].length) {
-				throw 'Error in constructing matrix.  Each row must be the same length.';
-			}
-		}
+
+		for (let i = 1; i < this._arr.length; i++)
+			if (this._arr[0].length != this._arr[i].length)
+				throw new Error(`Error in constructing matrix.  Row ${i} is not the same length as previous rows.`);
+	}
+
+	set SMmultiplier(value: number | Integer) {
+		this._SMmult = typeof value === 'number' ? new Integer(value) : value;
+	}
+
+	get SMmultiplier(): Integer {
+		return this._SMmult;
 	}
 
 	// number of rows in the matrix.
@@ -100,7 +113,7 @@ export class Matrix {
 		const m = new Matrix(this._arr.length, this._arr[0].length);
 		for (let i = 1; i <= this._arr.length; i++)
 			for (let j = 1; j <= this._arr[0].length; j++) m.setElement(i, j, this.getElement(i, j).clone());
-
+		if (this._SMmult) m.SMmultiplier = this._SMmult.clone();
 		return m;
 	}
 
@@ -108,6 +121,12 @@ export class Matrix {
 		const rows = [];
 		for (let i = 0; i < this._arr.length; i++) rows.push(this._arr[i].join(' '));
 		return rows.join('\n');
+	}
+
+	toLaTeX(): string {
+		let str = '\\left[\\begin{array}{' + Array(this.ncol()).fill('r').join('') + '}\n';
+		for (let i = 0; i < this.nrow(); i++) str += this._arr[i].map((num) => num.toLaTeX()).join(' & ') + '\\\\\n';
+		return str + '\\end{array}\\right]';
 	}
 
 	// Returns the column from the vector as a ColumnVector
@@ -192,14 +211,13 @@ export class Matrix {
 	}
 
 	swapRows(row1: number, row2: number) {
-		const result = this.clone();
 		if (row1 < 1 || row1 > this.nrow() || row2 < 1 || row2 > this.nrow())
 			throw new Error('Row numbers must be within the valid rows of this matrix.');
 		if (row1 == row2) throw new Error('When swapping rows, the rows must be unique.');
-		const r = result.row(row1);
-		result.setRow(row1, result.row(row2));
-		result.setRow(row2, r);
-		return result;
+		const r = this.row(row1);
+		this.setRow(row1, this.row(row2));
+		this.setRow(row2, r);
+		return this;
 	}
 
 	multiplyRowBy(num: Constant, row: number) {
@@ -236,11 +254,101 @@ export class Matrix {
 
 	// Perform a pivot which preserves integers
 	pivotPreserveIntegers(row: number, col: number) {
+		if (row < 1 || row > this.nrow())
+			throw new Error('The row number for the pivot must be between 1 and the number of rows');
+		if (col < 1 || col > this.ncol())
+			throw new Error('The column number for the pivot must be between 1 and the number of columns');
+		if (this.getElement(row, col).equals(Integer.ZERO)) throw new Error('The pivot element cannot be zero.');
+		const mult: Integer = this._SMmult ?? new Integer(1);
+
 		if ((this.getElement(row, col) as Integer).compareTo(Integer.ZERO) < 0) this.multiplyRowBy(new Integer(-1), row);
 		const m = this.getElement(row, col);
-		for (let j = 1; j <= this.nrow(); j++)
-			if (j != row) this.rowCombination(this.getElement(j, col).neg(), row, this.getElement(row, col), j, j);
+
+		for (let i = 1; i <= this.nrow(); i++)
+			if (i != row)
+				this.rowCombination(this.getElement(i, col).neg().div(mult), row, this.getElement(row, col).div(mult), i, i);
+
+		this._SMmult = this.getElement(row, col) as Integer;
 		return this;
+	}
+
+	addRowToTableau(row: RowVector) {
+		const n = this.nrow();
+		const m = this.ncol();
+
+		if (row.length() != m + 1)
+			throw new Error('The new row in the input box does not contain the same number of elements as the new tableau.');
+
+		// Create a new matrix/tableau that is the previous one with the input
+		// put on the second to last row and filled with zeros on the second to last column.
+		const mat = new Matrix(n + 1, m + 1);
+		for (let i = 1; i < n; i++) {
+			for (let j = 1; j < m - 1; j++) mat.setElement(i, j, this.getElement(i, j));
+			mat.setElement(i, m, this.getElement(i, m - 1));
+			mat.setElement(i, m + 1, this.getElement(i, m));
+		}
+		mat.setRow(n, row);
+
+		for (let j = 1; j < m - 1; j++) mat.setElement(n + 1, j, this.getElement(n, j));
+		mat.setElement(n + 1, m, this.getElement(n, m - 1));
+		mat.setElement(n + 1, m + 1, this.getElement(n, m));
+
+		mat.SMmultiplier = this.SMmultiplier;
+		return mat;
+	}
+
+	// Check that the tableau is all integers and all basic columns are the same multiple
+	// of columns of the identity matrix.
+	checkTableau(): Matrix {
+		let cols = new Array<Integer>(this.nrow() - 1);
+		const n = this.ncol();
+		const m = this.nrow();
+		let max = new Integer(-1);
+		for (let j = 1; j <= n; j++) {
+			const col = this.column(j);
+			let mx = this.getElement(1, j) as Integer;
+			let loc = 1;
+			for (let i = 1; i <= m; i++) {
+				if (!(this.getElement(i, j) instanceof Integer))
+					throw new Error('In Simplex Mode, the matrix must be all integers');
+				if ((this.getElement(i, j) as Integer).compareTo(mx) > 0) {
+					mx = this.getElement(i, j) as Integer;
+					loc = i;
+				}
+			}
+			const abs_sum = col.asArray().reduce((m, v) => (v as Integer).abs().plus(m), new Integer(0));
+
+			if (mx.equals(abs_sum))
+				if (loc > 0 && cols[loc - 1] == undefined) cols[loc - 1] = mx;
+				else
+					throw new Error(
+						'When use Simplex mode, columns that are multiples of the identity columns cannot be repeated.'
+					);
+		}
+		// remove any undefined elements and sort
+		const sorted_cols = cols.filter((v) => v);
+		sorted_cols.sort((a, b) => Number(a.value - b.value));
+		if (sorted_cols.length === 0) {
+			this._SMmult = new Integer(1);
+			return this;
+		}
+		if (sorted_cols[0].value !== sorted_cols.at(-1)?.value)
+			throw new Error('When use Simplex mode, columns that are multiples of the identity must have the same multiple.');
+		this._SMmult = sorted_cols[0];
+		return this;
+	}
+
+	// Perform a general operation on the matrix.
+	operate(op: MatrixOperation): Matrix {
+		const result = this.clone();
+		if (op instanceof MultiplyRow) result.multiplyRowBy(op.scalar, op.row);
+		else if (op instanceof RowSwap) result.swapRows(op.row1, op.row2);
+		else if (op instanceof MultiplyRowAndAdd) result.rowCombination(op.scalar1, op.row1, op.scalar2, op.row2, op.row3);
+		else if (op instanceof Pivot) result.pivot(op.row, op.col);
+		else if (op instanceof PivotPreserveIntegers) result.pivotPreserveIntegers(op.row, op.col);
+		else if (op instanceof AddRowToTableau) return result.addRowToTableau(op.row);
+		else throw "This line shouldn't be reached.";
+		return result;
 	}
 }
 
