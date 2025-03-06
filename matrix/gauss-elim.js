@@ -104,7 +104,7 @@ function restart() {
   store the matrix as an object and give the user a textbox for row operation input.
 */
 
-function storeMatrix() {
+async function storeMatrix() {
   try {
     // If the matrix has a \hline in it, turn on the appropriate setting
     if (/\hline/.test($j("#matrix-entry").val())) {
@@ -138,10 +138,17 @@ function storeMatrix() {
   $j("#main-div").append(
     "<div id='out-0'> \\[" + decorateMatrix(matrices[0]) + "\\] </div>"
   );
+
   $j("#row1").css("display", "none");
   $j("#entry-buttons").css("display", "none");
-  rowOpInput();
-  MathJax.Hub.Queue(["Typeset", MathJax.Hub, "out-0"]);
+  // rowOpInput();
+  const node = document.getElementById("out-0");
+  await MathJax.startup.promise // make sure initial typesetting has taken place
+  // MathJax.typesetClear([node]) // clear MathJax awareness of this element
+  await MathJax.typesetPromise([node]) // typeset anew
+  // console.log(node);
+  // MathJax.typeset();
+  // MathJax.Hub.Queue(["Typeset", MathJax.Hub, "out-0"]);
 }
 
 function decorateMatrix(m) {
