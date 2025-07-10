@@ -1,5 +1,4 @@
-body {font-size: 125%;  font-family: Verdana, sans-serif}
-
+body { font-size: 125%}
 
 #matrix-input {display: none; position: absolute; right: 360px; top: 100px;
 width: 400px; border: ridge 3px black; padding: 20px; background-color: rgb(240,255,240)}
@@ -15,5 +14,4 @@ margin-bottom: 5px; padding: 5px; height: 95%}
 
 #help-link {position: absolute; right: 10px;}
 #set-link {position: absolute; right: 75px;}
-button {margin-left: 5px; margin-right: 5px}
 

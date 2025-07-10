@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const button = document.getElementById("change-me");
+        const mathBox = document.getElementById("math");
+
+        let promise = Promise.resolve();  // Used to hold chain of typesetting calls
+
+        function typeset(code) {
+          promise = promise
+            .then(() => MathJax.typesetPromise(code()))
+            .catch((err) => console.log("Typeset failed: " + err.message));
+          return promise;
+        }
+
+        button.addEventListener("click", () => {
+          typeset(() => {
+            const math = document.querySelector("#math");
+            math.innerHTML = "$$\\frac{a}{1-a^2}$$";
+            return [math];
+          });
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="math">This will change when the button is pressed.</div>
+    <button id="change-me">Update!</button>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/es5/tex-chtml.js"></script>
+    <script>
+      window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']] // Enable single dollar signs for inline math
+            },
+            startup: {
+                ready: () => {
+                    console.log('MathJax is loaded and ready!');
+                    // You can perform actions here after MathJax is fully loaded
+                    // For example, if you dynamically add content, you might call:
+                    // MathJax.typesetPromise();
+                }
+            }
+        };
+    </script>
+  </body>
+</html>

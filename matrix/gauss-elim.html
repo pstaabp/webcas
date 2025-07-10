@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="icon" type="image/png" href="../favicon.png">
 <meta http-equiv="content-script-type" content="text/javascript">
 
 <title>WebCAS -- Gaussian Eliminator</title>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css"
+  integrity="sha512-fw7f+TcMjTb7bpbLJZlP8g2Y4XcCyFZW8uy8HsRZsH/SwbMw0plKHFHr99DN3l04VsYNwvzicUX/6qurvIxbxw=="
+  crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <style type="text/css">
 @import "../style/webcas.css";
@@ -14,7 +17,7 @@
 body {padding-top: 55px; padding-bottom:30px;}
 </style>
 
-
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
 
 </head>
 
@@ -59,16 +62,12 @@ body {padding-top: 55px; padding-bottom:30px;}
     <p style="width: 600px; font-size:80%">For help click on ? on top bar:  <span style="padding-left:100px">
       <button id="restart-button" class="btn btn-sm btn-outline-dark" >Restart</button></span>
     </p>
-    <div class="row mb-3" id="row1">
+    <div class="row mb-3" id="start">
       <label for="matrix-entry" class="form-label">Enter a Matrix</label>
-      <textarea class="form-control" id="matrix-entry" rows="8"></textarea>
-    </div>
-    <div class="row mb-3" id="entry-buttons">
-      <div class="col-3">
-      <button id="clear-matrix-button" class="btn btn-sm btn-outline-dark">Clear Matrix</button><br/>
-      </div>
-      <div class="col-3">
-        <button id="store-matrix-button" class="btn btn-sm btn-primary">Enter Matrix</button></td></tr></tbody></table>
+      <textarea class="form-control mb-4" id="matrix-entry" rows="8"></textarea>
+      <div class="btn-group col-3" id="entry-buttons">
+        <button id="clear-matrix-button" class="btn btn-outline-dark">Clear Matrix</button><br/>
+        <button id="store-matrix-button" class="btn btn-primary">Enter Matrix</button></td></tr></tbody></table>
       </div>
     </div>
   </div>
@@ -91,11 +90,11 @@ body {padding-top: 55px; padding-bottom:30px;}
           <ul>
           <li><span style="font-weight: bold"> Multiply a Row by a constant</span>
 
-          To multiply a row by a constant, use the input <tt>2*R1-&gt;R1</tt> which multiplies row 1 by 2.   Often the row on the right side of the <tt>-&gt;</tt> is left off such as <tt>2*R1</tt>.  The multiplication sign <tt>*</tt> is also optional.  Note:  the arrow <tt>-></tt> is entered as a dash <tt>-</tt> followed by the greater than symbol <tt>&gt;</tt></li>
+          To multiply a row by a constant, use the input <code>2*R1-&gt;R1</code> which multiplies row 1 by 2.   Often the row on the right side of the <code>-&gt;</code> is left off such as <code>2*R1</code>.  The multiplication sign <code>*</code> is also optional.  Note:  the arrow <code>-></code> is entered as a dash <code>-</code> followed by the greater than symbol <code>&gt;</code></li>
 
-          <li><span style="font-weight: bold">Multiply a row by a constant and add to another.</span>  To add rows 1 and 2 and place the result in row 2, type <tt>R1+R2->R2</tt>.  One can also multiply rows by constants.  For example, <tt>-3R1+R3->R3</tt> or <tt>R1+(11/2)R2->R2</tt>. </li>
+          <li><span style="font-weight: bold">Multiply a row by a constant and add to another.</span>  To add rows 1 and 2 and place the result in row 2, type <code>R1+R2->R2</code>.  One can also multiply rows by constants.  For example, <code>-3R1+R3->R3</code> or <code>R1+(11/2)R2->R2</code>. </li>
 
-          <li><span style="font-weight: bold">Swap two rows</span> To swap two rows, type the two rows to swap separated by &lt;-&gt; (This should look like a double-headed arrow.)  For example, <tt>R1&lt;-&gt;R3</tt> swaps rows 1 and 3. </li>
+          <li><span style="font-weight: bold">Swap two rows</span> To swap two rows, type the two rows to swap separated by &lt;-&gt; (This should look like a double-headed arrow.)  For example, <code>R1&lt;-&gt;R3</code> swaps rows 1 and 3. </li>
 
 
           </ul>
@@ -106,7 +105,7 @@ body {padding-top: 55px; padding-bottom:30px;}
 
             \[ \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{array} \right]  \]
 
-    The two row operations <tt>-4R1+R2->R2, -7R1+R3->R3</tt> will lead to the matrix:
+    The two row operations <code>-4R1+R2->R2, -7R1+R3->R3</code> will lead to the matrix:
 
             \[  \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 0 & -3 & -6 \\ 0 & -6 & -12 \end{array} \right] \]
             </p>
@@ -137,14 +136,14 @@ body {padding-top: 55px; padding-bottom:30px;}
 
 
 
-    <p>This can be done with the <tt>pivot</tt> command which has the form: <tt>pivot(i,j)</tt> which pivots about the ith row and jth column. For example, the above pivot can be done with the command <tt>pivot(1,2)</tt>.  </p>
+    <p>This can be done with the <code>pivot</code> command which has the form: <code>pivot(i,j)</code> which pivots about the ith row and jth column. For example, the above pivot can be done with the command <code>pivot(1,2)</code>.  </p>
 
-    <p>In addition, there is a pivot command called <tt>piv</tt> that doesn't introduce more fractions into the matrix.  (However, if fractions are already present, then they will remain).  This performs similar row operations to that of the <tt>pivot</tt> to get a column which is a multiple of the identity matrix.  For example, we will
+    <p>In addition, there is a pivot command called <code>piv</code> that doesn't introduce more fractions into the matrix.  (However, if fractions are already present, then they will remain).  This performs similar row operations to that of the <code>pivot</code> to get a column which is a multiple of the identity matrix.  For example, we will
     redo the pivot command to the matrix above
 
     \[ \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{array} \right]  \]
             </p>
-            <p>Applying <tt>piv(1,2)</tt>, the resulting matrix is:
+            <p>Applying <code>piv(1,2)</code>, the resulting matrix is:
 
             \[  \left[ \begin{array}{rrr} 1 & 2 & 3 \\ 1 & 0 & -1 \\ 1 & 0 & -1 \end{array} \right] \]
 
@@ -152,7 +151,7 @@ body {padding-top: 55px; padding-bottom:30px;}
 
             <h4>Converting a matrix to Decimals</h4>
 
-            <p>The command <tt>toDecimal</tt> will convert all the rational numbers to decimals (usually about 15 decimal places).   For example starting with the matrix:
+            <p>The command <code>toDecimal</code> will convert all the rational numbers to decimals (usually about 15 decimal places).   For example starting with the matrix:
             \[ \left[ \begin{array}{rr} 1/2 & 1/3 \\ 4/9 & 1/7 \end{array} \right]\]
     and typing "toDecimal" in the input box results in
     \[ \left[ \begin{array}{rr} 0.5 &0.4444444444444444 \\ 0.3333333333333333& 0.14285714285714285\end{array}\right]\]
@@ -163,7 +162,7 @@ body {padding-top: 55px; padding-bottom:30px;}
           <p>A number of errors can arise from various forms of input.  The main error arises from a bad parsing error.  </p>
 
           <h4>Errors on entering a matrix</h4>
-          <p>The matrix should be entered as each row on a separate line in the text box.  Each element of the matrix should be separated by spaces and each element can either be an integer, rational (entered with a <tt>/</tt>) or decimal.  Its important that each row has the same number of elements.  </p>
+          <p>The matrix should be entered as each row on a separate line in the text box.  Each element of the matrix should be separated by spaces and each element can either be an integer, rational (entered with a <code>/</code>) or decimal.  Its important that each row has the same number of elements.  </p>
 
           <h4>Errors on row operations</h4>
 
@@ -171,13 +170,13 @@ body {padding-top: 55px; padding-bottom:30px;}
 
           <ul>
             <li>All row operations use a CAPITAL R. </li>
-          <li>On row swaps, this should be entered only as <tt>R1&lt;-&gt;R2</tt> for example.</li>
+          <li>On row swaps, this should be entered only as <code>R1&lt;-&gt;R2</code> for example.</li>
 
-          <li>On operations with mulitplying rows, the multiplication sign is optional.  For example either <tt>2*R1-&gt;R1</tt> or <tt>2R1-&gt;R1</tt> can be used.  </li>
+          <li>On operations with mulitplying rows, the multiplication sign is optional.  For example either <code>2*R1-&gt;R1</code> or <code>2R1-&gt;R1</code> can be used.  </li>
 
-          <li>If a rational number (fraction) is used as multiplication, then it should be surrounded by parentheses. For example, <tt>(1/2)R2-&gt;R2</tt>.</li>
+          <li>If a rational number (fraction) is used as multiplication, then it should be surrounded by parentheses. For example, <code>(1/2)R2-&gt;R2</code>.</li>
 
-          <li>The row on the right hand side of the arrow <tt>-&gt;</tt> is optional.  If it is left off, it is assumed that the resultant row is the last row entered.  For example, the row operations: <tt>4R1+R3->R3</tt> and <tt>4R1+R3</tt> are equivalent.  </li>
+          <li>The row on the right hand side of the arrow <code>-&gt;</code> is optional.  If it is left off, it is assumed that the resultant row is the last row entered.  For example, the row operations: <code>4R1+R3->R3</code> and <code>4R1+R3</code> are equivalent.  </li>
 
           </ul>
 
@@ -338,18 +337,16 @@ body {padding-top: 55px; padding-bottom:30px;}
       </div>
       </div>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-</script>
-<script type="text/javascript" src="../common/prototype.js">  </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.min.js"
+integrity="sha512-zKeerWHHuP3ar7kX2WKBSENzb+GJytFSBL6HrR2nPSR1kOX1qjm+oHooQtbDpDBSITgyl7QXZApvDfDWvKjkUw=="
+crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- <script type="text/javascript" src="../common/prototype.js">  </script> -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script type="text/javascript" src="../common/functions.js"></script>
 <script type="text/javascript" src="../common/constants.js"></script>
 <script type="text/javascript" src="../common/matrix-operations.js"></script>
-
-<!--<link type="text/css" href="../style/jquery-ui-dialog.css" rel="Stylesheet" />
-<script type="text/javascript" src="../common/jquery-ui-dialog.min.js"></script> -->
-
 <script type="text/javascript" src="gauss-elim.js"> </script>
 </html>
