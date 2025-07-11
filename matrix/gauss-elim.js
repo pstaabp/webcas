@@ -34,7 +34,6 @@ window.addEventListener("DOMContentLoaded", () => {
 function loadSettings() {
   if (!("localStorage" in window && window["localStorage"] !== null) || localStorage.getItem("GEset") == null) {
     settings = {
-      simplexMode: false,
       vertLine: "none",
       horizLine: false,
       slackLine: "none",
@@ -49,7 +48,6 @@ function loadSettings() {
     document.getElementById("vertLine").value = settings.vertLine;
 
     // Set checkboxes
-    document.getElementById("simplexMode").checked = settings.simplexMode;
     document.getElementById("horizLine").checked = settings.horizLine;
     document.getElementById("firstColLine").checked = settings.firstColLine;
     document.getElementById("addRow").checked = settings.addRow;
@@ -74,7 +72,6 @@ function loadSettings() {
 function parseSettings() {
   settings.vertLine = document.getElementById("vertLine").value;
   settings.slackLine = document.getElementById("slackLine").checked;
-  settings.simplexMode = document.getElementById("simplexMode").checked;
   settings.addRow = document.getElementById("addRow").checked;
   settings.firstColLine = document.getElementById("firstColLine").checked;
   settings.horizLine = document.getElementById("horizLine").checked;
@@ -129,10 +126,6 @@ async function storeMatrix() {
     ) {
       matrices[0] = matrices[0].toRational();
     }
-  }
-
-  if (settings.simplexMode) {
-    matrices[0].SMMultiplier = new Integer(1);
   }
 
   const mainDiv = document.getElementById("main-div");
@@ -321,10 +314,11 @@ function addOutputToPage(rowOpStr) {
 
   // Add the result to the page
   const outputDiv = document.createElement("div");
+  outputDiv.id = `out-${step.at(-1)}`;
   outputDiv.classList.add("row-op-step");
   outputDiv.style.display = "flex";
+
   const mathOutput = document.createElement("div");
-  mathOutput.id = `out-${step.at(-1)}`;
   mathOutput.style.width = "90%";
   outputDiv.appendChild(mathOutput);
 
