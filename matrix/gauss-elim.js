@@ -3,7 +3,6 @@ var step = new Array(0);
 var rowOperation = new Array(0); // this will store the internal object version of the row operation
 var rowOperationStr = new Array(0);
 var settings = null;
-var $j = jQuery.noConflict();
 let promise; // Used to hold chain of typesetting calls
 
 // Run the following code upon loading the document.
@@ -18,7 +17,10 @@ window.addEventListener("DOMContentLoaded", () => {
   });
   matrixEntry.focus();
 
-  document.getElementById("clear-matrix-button").addEventListener("click", () => (matrixEntry.value = ""));
+  document.getElementById("clear-matrix-button").addEventListener("click", () => {
+    matrixEntry.value = "";
+    matrixEntry.focus();
+  });
   document.getElementById("store-matrix-button").addEventListener("click", storeMatrix);
   document.getElementById("restart-button").addEventListener("click", restart);
   document.getElementById("save-settings").addEventListener("click", parseSettings);
@@ -29,6 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
       .catch(() => console.log("error"));
   });
   loadSettings();
+  document.getElementById("click-to-pivot-div").style.display = settings.showClickPivot ? "block" : "none";
 });
 
 function loadSettings() {
@@ -40,7 +43,7 @@ function loadSettings() {
       firstColLine: false,
       addRow: false,
       showLaTeX: false,
-      pivButton: false,
+      showClickPivot: false,
     };
   } else {
     settings = JSON.parse(localStorage.getItem("GEset"));
@@ -52,7 +55,7 @@ function loadSettings() {
     document.getElementById("firstColLine").checked = settings.firstColLine;
     document.getElementById("addRow").checked = settings.addRow;
     document.getElementById("showLaTeX").checked = settings.showLaTeX;
-    document.getElementById("pivButton").checked = settings.pivButton;
+    document.getElementById("showClickPivot").checked = settings.showClickPivot;
 
     // Not sure what these are doing:
 
@@ -75,19 +78,21 @@ function parseSettings() {
   settings.addRow = document.getElementById("addRow").checked;
   settings.firstColLine = document.getElementById("firstColLine").checked;
   settings.horizLine = document.getElementById("horizLine").checked;
-  settings.pivButton = document.getElementById("pivButton").checked;
+  settings.showClickPivot = document.getElementById("showClickPivot").checked;
   settings.showLaTeX = document.getElementById("showLaTeX").checked;
   localStorage.setItem("GEset", JSON.stringify(settings));
 }
 
 function restart() {
-  console.log("in restart");
   const mainDiv = document.getElementById("main-div");
-  mainDiv.removeChild(document.getElementById("input-row"));
-  mainDiv.removeChild(document.getElementById("out-0"));
+  const inputRow = document.getElementById("input-row");
+  if (inputRow) mainDiv.removeChild(inputRow);
+  const out0 = document.getElementById("out-0");
+  if (out0) mainDiv.removeChild(out0);
   document.getElementById("start").style.display = "block";
 
-  Array.from(document.querySelectorAll('.row-op-step')).forEach( (r) => mainDiv.removeChild(r));
+  document.getElementById("click-to-pivot-div").style.display = settings.pivButton ? "block" : "none";
+  Array.from(document.querySelectorAll(".row-op-step")).forEach((r) => mainDiv.removeChild(r));
 
   const matrixEntry = document.getElementById("matrix-entry");
   matrixEntry.value = matrices[0].toString().replaceAll("<br/>", "\n").replaceAll(",", " ");
@@ -106,7 +111,8 @@ function restart() {
 async function storeMatrix() {
   try {
     // If the matrix has a \hline in it, turn on the appropriate setting
-    if (/\hline/.test($j("#matrix-entry").val())) {
+    const matrixStr = document.getElementById('matrix-entry').value;
+    if (/\hline/.test(matrixStr)) {
       settings.horizLine = true;
       document.getElementById("horizLine").checked = true;
     }
@@ -128,16 +134,21 @@ async function storeMatrix() {
     }
   }
 
-  const mainDiv = document.getElementById("main-div");
-
   typeset(() => {
     const firstMatrix = document.createElement("div");
     firstMatrix.id = "out-0";
     firstMatrix.innerHTML = "\\[" + decorateMatrix(matrices[0]) + "\\]";
-    mainDiv.appendChild(firstMatrix);
+    document.getElementById("main-div").appendChild(firstMatrix);
     document.getElementById("start").style.display = "none";
-    rowOpInput();
+
     return [firstMatrix];
+  }).then(() => {
+    // the matrix needs to be typest before clickablePivots is called.
+    if (document.getElementById("click-to-pivot").checked) {
+      clickablePivots();
+    } else {
+      rowOpInput();
+    }
   });
 }
 
@@ -276,16 +287,15 @@ function addRowToTableau() {
 }
 
 function showLaTeXcode() {
-  console.log("in showLaTeXCode");
   const latexModel = new bootstrap.Modal(document.getElementById("latex-modal"));
   document.getElementById("latex-modal-body").innerHTML = "<pre>" + decorateMatrix(matrices.at(-1)) + "</pre>";
   latexModel.show();
 }
 
-function parseRowOp() {
+function parseRowOp(input_str) {
   var rowOp = null;
   try {
-    const str = document.getElementById("input-box").value;
+    const str = input_str || document.getElementById("input-box").value;
     rowOperationStr[rowOperationStr.length] = str;
     rowOp = ElementaryRowOperation.parse(str);
 
@@ -310,7 +320,8 @@ function parseRowOp() {
 }
 
 function addOutputToPage(rowOpStr) {
-  document.getElementById("main-div").removeChild(document.getElementById("input-row"));
+  const inputRow = document.getElementById("input-row");
+  if (inputRow) document.getElementById("main-div").removeChild(inputRow);
 
   // Add the result to the page
   const outputDiv = document.createElement("div");
@@ -343,20 +354,23 @@ function addOutputToPage(rowOpStr) {
   outputDiv.appendChild(copyLaTeXDiv);
 
   document.getElementById("main-div").appendChild(outputDiv);
-  // console.log(outputDiv.innerHTML);
 
   typeset(() => {
-    mathOutput.innerText = "\\[" + rowOpStr + "\\qquad" + decorateMatrix(matrices.at(-1)) + "\\]";
+    mathOutput.innerText = `\\[${rowOpStr} \\qquad ${decorateMatrix(matrices.at(-1))} \\]`;
     return [outputDiv];
+  }).then(() => {
+    if (document.getElementById("click-to-pivot").checked) {
+      clickablePivots();
+    } else {
+      rowOpInput();
+    }
   });
 
-  rowOpInput();
   // scroll to the bottom after entering in the input.
   window.scroll(0, document.body.clientHeight);
 }
 
-function undo(obj) {
-  console.log("in undo");
+function undo() {
   const mainDiv = document.getElementById("main-div");
   if (step.at(-1) == 0) {
     restart();
@@ -383,77 +397,33 @@ function undo(obj) {
 // Called after piv-button is clicked, makes the elements of the currently typeset matrix clickable.
 // In addition, hovering an element will give a different cursor and background color.
 function clickablePivots() {
+  // remove the classname and event listeners from previous matrix.
+  Array.from(document.querySelectorAll('.pivotable'))
+    .forEach((el) => {
+      el.removeEventListener('click', pivotOnClick);
+      el.classList.remove('pivotable');
+    });
+
   // This sections grabs the current matrix and stores its name and elements
-  var newMatrixId = "out-" + step.at(-1);
-  var entries = $j(`#${newMatrixId} .mn`);
-  var numRows = matrices[matrices.length - 1].arr.length;
-  var index = 0;
+  var entries = Array.from(document.querySelectorAll(`#out-${step.at(-1)} mjx-table mjx-mn`));
+
+  // If its not the original matrix, then slice the piv(x,y) numbers out
+  if (step.at(-1)>0) entries.splice(0,2);
+  var numRows = matrices.at(-1).arr.length;
+  var numCols = matrices.at(-1).arr[0].length;
 
   // Assign an index attribute as the (m,n) coordinates of the entry as a string
-  // Uses a little math to calculate (m,n) matrix indices, and stores it as an array value in a dictionary, with the MathJax id as the key
-  // If its not the original matrix, then slice the piv(x,y) numbers out
-  if (newMatrixId != "out-0") entries = entries.slice(2);
-
-  entries
-    .forEach(function () {
-      $j(this).attr("index", (index % numRows) + 1 + "," + Math.ceil((index + 1) / numRows)); // Create index attribute as "m,n"
-      this.on("click", pivotOnClick); // Set onclick
-      index++;
-    })
-    .addClass("pivotable"); // Set pivotable class for highlighting
+  entries.forEach((el, index) => {
+    el.dataset.index = `(${Math.ceil((index + 1) / numCols)},${1 + (index % numCols)})`;
+    el.addEventListener("click", pivotOnClick);
+    el.classList.add("pivotable");
+  });
 }
 
-// Called during rowOpInput() to make the previous matrix unclickable
-function unclickablePivots() {
-  // This sections grabs the current matrix and stores its name and elements
-  var matrixID = "out-" + step.at(-1);
-  var entries = $j("#" + matrixID + " .mn");
-
-  // If its not the original matrix, slice the piv(x,y) numbers
-  if (matrixID != "out-0") entries = entries.slice(2);
-
-  // Remove onclick, revert class to mn, unbind hover, restore white background since mouseleave won't do it anymore
-  entries
-    .forEach(function () {
-      $j(this).off("click", pivotOnClick);
-    })
-    .removeClass("pivotable");
-}
-
-// Sets the clicked element to green, and pivots on it
 function pivotOnClick() {
   // Remove last clicked attribute (reset last pivot to white)
-  $j(".lastClicked").removeClass("lastClicked");
-
-  // Set clicked element to green, set new lastClicked
-  $j(this).addClass("lastClicked");
-
-  // Put the piv string in the row input box and then parse the operation
-  $j("#input-box").val("piv(" + $j(this).attr("index") + ")");
-  parseRowOp();
-}
-
-// return a promise
-function copyToClipboard(textToCopy) {
-  // navigator clipboard api needs a secure context (https)
-  if (navigator.clipboard && window.isSecureContext) {
-    // navigator clipboard api method'
-    return navigator.clipboard.writeText(textToCopy);
-  } else {
-    // text area method
-    let textArea = document.createElement("textarea");
-    textArea.value = textToCopy;
-    // make the textarea out of viewport
-    textArea.style.position = "fixed";
-    textArea.style.left = "-999999px";
-    textArea.style.top = "-999999px";
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    return new Promise((res, rej) => {
-      // here the magic happens
-      document.execCommand("copy") ? res() : rej();
-      textArea.remove();
-    });
-  }
+  const lastClicked = document.querySelector(".lastClicked");
+  if (lastClicked) lastClicked.classList.remove("lastClicked");
+  this.classList.add("lastClicked");
+  parseRowOp(`piv${this.dataset.index}`);
 }
