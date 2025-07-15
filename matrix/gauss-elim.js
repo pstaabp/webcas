@@ -143,7 +143,7 @@ async function storeMatrix() {
 
     return [firstMatrix];
   }).then(() => {
-    // the matrix needs to be typest before clickablePivots is called.
+    // the matrix needs to be typeset before clickablePivots is called.
     if (document.getElementById("click-to-pivot").checked) {
       clickablePivots();
     } else {
@@ -409,7 +409,6 @@ function clickablePivots() {
 
   // If its not the original matrix, then slice the piv(x,y) numbers out
   if (step.at(-1)>0) entries.splice(0,2);
-  var numRows = matrices.at(-1).arr.length;
   var numCols = matrices.at(-1).arr[0].length;
 
   // Assign an index attribute as the (m,n) coordinates of the entry as a string

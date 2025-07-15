@@ -184,6 +184,8 @@ Matrix.prototype.operate = function (rowOp) {
     if (this.arr[rowOp.row - 1][rowOp.col - 1].equals(Integer.ZERO))
       throw "The matrix cannot be pivoted about a 0 entry.";
     return this.pivotPreserveIntegers(rowOp.row - 1, rowOp.col - 1);
+  } else if (rowOp instanceof TableauPivot) {
+    return this.tableauPivot(rowOp.enter, rowOp.exit);
   } else if (rowOp instanceof ToDecimal) return this.toDecimal();
   return;
 };
@@ -231,6 +233,38 @@ Matrix.prototype.pivotPreserveIntegers = function (row, col) {
   m.SMMultiplier = m.arr[row][col];
   return m;
 };
+
+/* This perform a tableau pivot that has the form i |-> j */
+
+Matrix.prototype.tableauPivot = function (enter, exit) {
+  if (this.pi === undefined || this.beta === undefined) {
+    const basis = this.basis();
+    this.beta = basis.beta;
+    this.pi = basis.pi;
+  }
+
+  if (!this.pi.has(enter)) throw `The variable ${enter} must be a parameter`;
+  if (!this.beta.has(exit)) throw `The variable ${exit} must be a basis variable`;
+
+  this.beta.add(enter);
+  this.beta.delete(exit);
+  this.pi.add(exit);
+  this.pi.delete(enter);
+
+  const exitCol = isIdentityMultiple(this.column(exit));
+
+  return this.pivotPreserveIntegers(exitCol.location-1, enter-1);
+}
+
+/* Determine the basis and parameter set for a simplex tableau */
+
+Matrix.prototype.basis = function() {
+  const poss_cols = new Set(Array.from(Array(this.arr[0].length-2).keys()).map(i => i+1));
+  const cols = [...poss_cols].map(j => ({ ...{col: j }, ...isIdentityMultiple(this.column(j))}));
+  const id_cols = new Set(cols.filter(c => c.is_identity).map(c => c.col));
+  return {beta: id_cols, pi: poss_cols.symmetricDifference(id_cols)};
+}
+
 
 /* Mulitply a Row of the matrix by a number (and add to a multiple of another row) */
 
@@ -629,9 +663,11 @@ ElementaryRowOperation.parse = function (str) {
 
   var form3 = /pivot\((\d+),(\d+)\)/;
   var form4 = /piv\((\d+),(\d+)\)/;
+  var form5 = /(\d+)\s*\|->\s*(\d+)/;
 
   var result3 = form3.exec(str);
   var result4 = form4.exec(str);
+  const result5 = form5.exec(str);
 
   if (str == "toDecimal") {
     rowOps[0] = new ToDecimal();
@@ -639,14 +675,14 @@ ElementaryRowOperation.parse = function (str) {
     rowOps[0] = new Pivot(Number(result3[1]), Number(result3[2]));
   } else if (result4 != null) {
     rowOps[0] = new PivotPreserveIntegers(Number(result4[1]), Number(result4[2]));
+  } else if (result5 != null) {
+    rowOps[0] = new TableauPivot(Number(result5[1]), Number(result5[2]));
   } else if (str.indexOf(",") > 0) {
     substrings = str.split(",");
-
     for (var i = 0; i < substrings.length; i++) rowOps[i] = this.parseString(substrings[i]);
   } else {
     rowOps[0] = this.parseString(str);
   }
-
   return rowOps;
 };
 
@@ -804,12 +840,6 @@ Pivot.prototype.toLaTeX = function () {
   return "\\mbox{pivot}(" + this.row + "," + this.col + ")";
 };
 
-/*
-Pivot.prototype.toMathML = function ()
-{
-  return <mrow><mo>pivot</mo><mo>(</mo><mn>{this.row}</mn><mo>,</mo><mn>{this.col}</mn><mo>)</mo></mrow>;
-} */
-
 PivotPreserveIntegers.prototype = new ElementaryRowOperation();
 PivotPreserveIntegers.prototype.constructor = PivotPreserveIntegers;
 function PivotPreserveIntegers(i, j) {
@@ -824,6 +854,21 @@ PivotPreserveIntegers.prototype.toString = function () {
 PivotPreserveIntegers.prototype.toLaTeX = function () {
   return "\\mbox{piv}(" + this.row + "," + this.col + ")";
 };
+
+TableauPivot.prototype = new ElementaryRowOperation();
+TableauPivot.prototype.constructor = TableauPivot;
+function TableauPivot(i,j) {
+  this.enter = i;
+  this.exit = j;
+}
+
+TableauPivot.prototype.toString = function () {
+  return `TableauPivot(${this.enter},${this.exit})`;
+}
+
+TableauPivot.prototype.toLaTeX = function () {
+  return `${this.enter} \\mapsto ${this.exit}`;
+}
 
 ToDecimal.prototype = new ElementaryRowOperation();
 ToDecimal.prototype.constructor = ToDecimal;
