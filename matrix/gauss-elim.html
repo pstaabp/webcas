@@ -223,12 +223,12 @@ body {padding-top: 55px; padding-bottom:30px;}
         <div class="modal-body">
           <form>
             <div class="row mb-3">
-              <label for="vertLine" class="col-sm-7 col-form-label">Vertical Line Mode
+              <label for="vertLine" class="col-sm-8 col-form-label">Vertical Line Mode
                 <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#vert-line-help" aria-expanded="false" aria-controls="collapseExample">
                   ?
                 </button>
               </label>
-              <div class="col-sm-5">
+              <div class="col-sm-4">
                 <select class="form-select" id="vertLine" aria-label="Vertical Line Mode">
                   <option selected value="none">None</option>
                   <option value="last_col">Before Last Column</option>
@@ -247,48 +247,75 @@ body {padding-top: 55px; padding-bottom:30px;}
             </div>
 
             <div class="row mb-3">
-              <label class="col-sm-10 col-check-label" for="horizLine">
+              <label class="col-sm-8 col-check-label" for="horizLine">
                 Horizontal Line for last row:
               </label>
-              <div class="col-sm-2">
+              <div class="col-sm-4">
                 <input class="form-check-input" type="checkbox" value="" id="horizLine">
               </div>
             </div>
             <div class="row mb-3">
-              <label for="" class="col-sm-10 col-form-label">Use vertical line to separate slack variables</label>
-              <div class="col-sm-2">
-                <input class="form-check-input" type="checkbox" value="" id="slackLine">
+              <label for="slackVars" class="col-sm-8 col-form-label">Slack Variables
+                <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#slack-var-help" aria-expanded="false" aria-controls="slack-var-help">
+                  ?
+                </button>
+              </label>
+              <div class="col-sm-4">
+                <select class="form-select" id="slackVars" aria-label="Slack Variables">
+                  <option selected value="none">None</option>
+                  <option value="standard">Standard</option>
+                  <option value="custom">Custom</option>
+                </select>
               </div>
             </div>
+             <div class="row mb-3">
+              <div class="collapse" id="slack-var-help">
+                <div class="card card-body" style="font-size: 80%">
+                  This option specifies how slack variables are separated from the regular variables in a simplex tableau. For the "none" option, no vertical line is added.  The "standard" option assumes that each constraint generates a slack variable and adds a vertical line to separate the slack variables from the regular variables.  The "custom" option allows the user to specify the number of slack variables.
+                </div>
+              </div>
+            </div>
+              <div class="row mb-3" id="custom-slack-row" style="display: none;">
+    <label for="customSlack" class="col-sm-8 col-form-label">Number of Slack Variables:</label>
+    <div class="col-sm-4">
+      <input type="number" class="form-control" id="customSlack" min="0" value="0">
+    </div>
+  </div>
+            <!-- <div class="row mb-3" id="custom-slack-row" style="display: none;">
+              <label class="col-sm-8 col-form-label" for="customSlack">Number of Slack Variables:</label>
+              <div class="col-sm-4">
+                <input class="form-control form-text" type="number" id="customSlack" placeholder="Number of Slack Variables" min="0" value="0">
+              </div>
+            </div> -->
             <div class="row mb-3">
-              <label class="col-sm-10 col-check-label" for="firstColLine">
+              <label class="col-sm-8 col-check-label" for="firstColLine">
                 Vertical Line to Separate First column
               </label>
-              <div class="col-sm-2">
+              <div class="col-sm-4">
                 <input class="form-check-input" type="checkbox" value="" id="firstColLine">
               </div>
             </div>
             <div class="row mb-3">
-              <label class="col-sm-10 col-check-label" for="addRow">
+              <label class="col-sm-8 col-check-label" for="addRow">
                 Include Add Row/Col to Simplex Tableau Button
               </label>
-              <div class="col-sm-2">
+              <div class="col-sm-4">
                 <input class="form-check-input" type="checkbox" value="" id="addRow">
               </div>
             </div>
             <div class="row mb-3">
-              <label class="col-sm-10 col-check-label" for="showLaTeX">
+              <label class="col-sm-8 col-check-label" for="showLaTeX">
                 Include Copy LaTeX links on matrices.
               </label>
-              <div class="col-sm-2">
+              <div class="col-sm-4">
                 <input class="form-check-input" type="checkbox" value="" id="showLaTeX">
               </div>
             </div>
             <div class="row mb-3">
-              <label class="col-sm-10 col-check-label" for="showClickPivot">
+              <label class="col-sm-8 col-check-label" for="showClickPivot">
                 Include Click to Pivot Option:
               </label>
-              <div class="col-sm-2">
+              <div class="col-sm-4">
                 <input class="form-check-input" type="checkbox" value="" id="showClickPivot">
               </div>
             </div>

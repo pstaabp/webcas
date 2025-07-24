@@ -25,6 +25,11 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("restart-button").addEventListener("click", restart);
   document.getElementById("save-settings").addEventListener("click", parseSettings);
 
+
+  document.getElementById("slackVars").addEventListener("change", (evt) => {
+    document.getElementById("custom-slack-row").style.display = evt.currentTarget.value == "custom" ? "flex" : "none";
+  });
+
   document.getElementById("copy-latex").addEventListener("click", () => {
     copyToClipboard(decorateMatrix(matrices[matrices.length - 1]))
       .then(() => console.log("text copied !"))
@@ -39,7 +44,7 @@ function loadSettings() {
     settings = {
       vertLine: "none",
       horizLine: false,
-      slackLine: "none",
+      slackVars: "none",
       firstColLine: false,
       addRow: false,
       showLaTeX: false,
@@ -52,29 +57,23 @@ function loadSettings() {
 
     // Set checkboxes
     document.getElementById("horizLine").checked = settings.horizLine;
+    document.getElementById("slackVars").value = settings.slackVars;
     document.getElementById("firstColLine").checked = settings.firstColLine;
     document.getElementById("addRow").checked = settings.addRow;
     document.getElementById("showLaTeX").checked = settings.showLaTeX;
     document.getElementById("showClickPivot").checked = settings.showClickPivot;
 
-    // Not sure what these are doing:
-
-    // $j("#numSlackVars").attr("disabled", true);
-    // if (settings["slackLine"] == "none") {
-    //   $j("#slackLine[value='none']").attr("checked", "checked");
-    // } else if (settings["slackLine"] == "std") {
-    //   $j("#slackLine[value='std']").attr("checked", "checked");
-    // } else if (parseInt(settings["slackLine"]) > -1) {
-    //   $j("#numSlackVars").attr("disabled", false);
-    //   $j("#numSlackVars").val(settings["slackLine"]);
-    //   $j("#slackLine[value='custom']").attr("checked", "checked");
-    // }
+    // Handle custom slack variable input visibility
+    document.getElementById("custom-slack-row").style.display =
+      settings.slackVars == "custom" ? "flex" : "none";
+    document.getElementById("customSlack").value = settings.numSlackVars;
   }
 }
 
 function parseSettings() {
   settings.vertLine = document.getElementById("vertLine").value;
-  settings.slackLine = document.getElementById("slackLine").checked;
+  settings.slackVars = document.getElementById("slackVars").value;
+  settings.numSlackVars = parseInt(document.getElementById("customSlack").value);
   settings.addRow = document.getElementById("addRow").checked;
   settings.firstColLine = document.getElementById("firstColLine").checked;
   settings.horizLine = document.getElementById("horizLine").checked;
@@ -111,7 +110,7 @@ function restart() {
 async function storeMatrix() {
   try {
     // If the matrix has a \hline in it, turn on the appropriate setting
-    const matrixStr = document.getElementById('matrix-entry').value;
+    const matrixStr = document.getElementById("matrix-entry").value;
     if (/\hline/.test(matrixStr)) {
       settings.horizLine = true;
       document.getElementById("horizLine").checked = true;
@@ -137,11 +136,38 @@ async function storeMatrix() {
   typeset(() => {
     const firstMatrix = document.createElement("div");
     firstMatrix.id = "out-0";
-    firstMatrix.innerHTML = "\\[" + decorateMatrix(matrices[0]) + "\\]";
+    firstMatrix.style.display = "flex";
+
+    const mathOutput = document.createElement("div");
+    mathOutput.style.width = "90%";
+    mathOutput.innerHTML = "\\[" + decorateMatrix(matrices[0]) + "\\]";
+    firstMatrix.appendChild(mathOutput);
+
+    // copied from below--perhaps com bine to a function.
+
+    // Add a div that will put an small button for copying latex code.
+    const copyLaTeXDiv = document.createElement("div");
+    copyLaTeXDiv.classList.add("copy-latex");
+    copyLaTeXDiv.style.width = "10%";
+    copyLaTeXDiv.dataset.step = step.at(-1);
+
+    if (settings.showLaTeX) {
+      const copyLaTeXButton = document.createElement("button");
+      copyLaTeXButton.classList.add("btn", "btn-secondary-outline");
+      copyLaTeXButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+        </svg>`;
+      copyLaTeXButton.addEventListener("click", (evt) => {
+        const st = parseInt(evt.currentTarget.parentNode.dataset.step);
+        navigator.clipboard.writeText(decorateMatrix(matrices[st]));
+      });
+      copyLaTeXDiv.appendChild(copyLaTeXButton);
+    }
+    firstMatrix.appendChild(copyLaTeXDiv);
     document.getElementById("main-div").appendChild(firstMatrix);
     document.getElementById("start").style.display = "none";
 
-    return [firstMatrix];
+    return [mathOutput];
   }).then(() => {
     // the matrix needs to be typeset before clickablePivots is called.
     if (document.getElementById("click-to-pivot").checked) {
@@ -162,8 +188,13 @@ function typeset(code) {
 function decorateMatrix(m) {
   var mstr = m.toLaTeX();
   // This decorates the matrix depending on the settings.
-  if (settings.slackLine) {
+  if (settings.slackVars == "standard") {
     const n = m.arr[0].length - m.arr.length - 1;
+    var re = new RegExp("{(r{" + n + "})(.*)}");
+    mstr = mstr.replace(re, "{$1|$2}");
+  } else if (settings.slackVars == "custom") {
+    const numCols = m.arr[0].length;
+    const n = numCols - settings.numSlackVars - 2;
     var re = new RegExp("{(r{" + n + "})(.*)}");
     mstr = mstr.replace(re, "{$1|$2}");
   }
@@ -253,6 +284,14 @@ function rowOpInput() {
   return;
 }
 
+/* Create an AddRow ElementaryRowOperation */
+
+AddRow.prototype = new ElementaryRowOperation();
+AddRow.prototype.constructor = AddRow;
+function AddRow(_row) {
+  this.row = _row;
+}
+
 function addRowToTableau() {
   const els = document.getElementById("input-box").value.trim().split(/\s+/);
 
@@ -282,20 +321,15 @@ function addRowToTableau() {
 
   matrices.push(mat);
   step.push(step.at(-1) + 1);
-
+  rowOperation.push(new AddRow(matrices.at(-1).arr[n - 1]));
+  rowOperationStr.push(els.join(" "));
   addOutputToPage("");
-}
-
-function showLaTeXcode() {
-  const latexModel = new bootstrap.Modal(document.getElementById("latex-modal"));
-  document.getElementById("latex-modal-body").innerHTML = "<pre>" + decorateMatrix(matrices.at(-1)) + "</pre>";
-  latexModel.show();
 }
 
 function parseRowOp(input_str) {
   var rowOp = null;
   try {
-    const str = input_str || document.getElementById("input-box").value;
+    const str = typeof input_str == "string" ? input_str : document.getElementById("input-box").value;
     rowOperationStr[rowOperationStr.length] = str;
     rowOp = ElementaryRowOperation.parse(str);
 
@@ -398,17 +432,16 @@ function undo() {
 // In addition, hovering an element will give a different cursor and background color.
 function clickablePivots() {
   // remove the classname and event listeners from previous matrix.
-  Array.from(document.querySelectorAll('.pivotable'))
-    .forEach((el) => {
-      el.removeEventListener('click', pivotOnClick);
-      el.classList.remove('pivotable');
-    });
+  Array.from(document.querySelectorAll(".pivotable")).forEach((el) => {
+    el.removeEventListener("click", pivotOnClick);
+    el.classList.remove("pivotable");
+  });
 
   // This sections grabs the current matrix and stores its name and elements
   var entries = Array.from(document.querySelectorAll(`#out-${step.at(-1)} mjx-table mjx-mn`));
 
   // If its not the original matrix, then slice the piv(x,y) numbers out
-  if (step.at(-1)>0) entries.splice(0,2);
+  if (step.at(-1) > 0) entries.splice(0, 2);
   var numCols = matrices.at(-1).arr[0].length;
 
   // Assign an index attribute as the (m,n) coordinates of the entry as a string
