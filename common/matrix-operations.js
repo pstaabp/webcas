@@ -213,6 +213,8 @@ Matrix.prototype.pivotPreserveIntegers = function (row, col) {
   let m = this.clone();
 
   if (m.SMMultiplier === undefined) {
+    // If the pivot value is negative, multiply by -1
+    if (m.arr[row][col] < 0) m = m.multiplyRowBy(row, new Integer(-1));
     for (var k = 0; k < this.arr.length; k++) {
       if (k == row) continue;
       m = m.multiplyRowBy(row, new Multiply(new Integer(-1), m.arr[k][col]), k, m.arr[row][col]);
@@ -246,14 +248,19 @@ Matrix.prototype.tableauPivot = function (enter, exit) {
   if (!this.pi.has(enter)) throw `The variable ${enter} must be a parameter`;
   if (!this.beta.has(exit)) throw `The variable ${exit} must be a basis variable`;
 
-  this.beta.add(enter);
-  this.beta.delete(exit);
-  this.pi.add(exit);
-  this.pi.delete(enter);
+  const beta =new Set([...this.beta]);
+  beta.add(enter);
+  beta.delete(exit);
+  const pi = new Set([...this.pi]);
+  pi.add(exit);
+  pi.delete(enter);
 
   const exitCol = isIdentityMultiple(this.column(exit));
+  const nextMatrix = this.pivotPreserveIntegers(exitCol.location-1, enter-1);
+  nextMatrix.beta = beta;
+  nextMatrix.pi = pi;
 
-  return this.pivotPreserveIntegers(exitCol.location-1, enter-1);
+  return nextMatrix;
 }
 
 /* Determine the basis and parameter set for a simplex tableau */
