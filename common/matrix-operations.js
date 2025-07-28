@@ -236,7 +236,15 @@ Matrix.prototype.pivotPreserveIntegers = function (row, col) {
   return m;
 };
 
-/* This perform a tableau pivot that has the form i |-> j */
+/* Determine if the input row is a zero row.  A zero row is a row that has all entries equal to zero. */
+function zeroRow(row) {
+  for (let el of row) {
+    if (!el.equals(Integer.ZERO)) return false;
+  }
+  return true;
+}
+
+/* This perform a tableau pivot that has the form enter |-> exit */
 
 Matrix.prototype.tableauPivot = function (enter, exit) {
   if (this.pi === undefined || this.beta === undefined) {
@@ -246,32 +254,44 @@ Matrix.prototype.tableauPivot = function (enter, exit) {
   }
 
   if (!this.pi.has(enter)) throw `The variable ${enter} must be a parameter`;
-  if (!this.beta.has(exit)) throw `The variable ${exit} must be a basis variable`;
+  if (!this.beta.has(exit) && exit != 0) throw `The variable ${exit} must be a basis variable`;
 
-  const beta =new Set([...this.beta]);
+  const beta = new Set([...this.beta]);
   beta.add(enter);
-  beta.delete(exit);
+  if (exit != 0) beta.delete(exit);
   const pi = new Set([...this.pi]);
-  pi.add(exit);
+  if (exit != 0) pi.add(exit);
   pi.delete(enter);
 
-  const exitCol = isIdentityMultiple(this.column(exit));
-  const nextMatrix = this.pivotPreserveIntegers(exitCol.location-1, enter-1);
+  let exitRow;
+  if (exit == 0) { // This brings a variable into the basis without removing one.
+    // Determine which row to pivot on.
+    const cols = [...this.beta, this.arr[0].length - 1];
+    [...Array.from({length: this.arr.length}).keys()].forEach((i) => {
+      cols.forEach((j) => {
+        const row = cols.map((j) => this.arr[i][j - 1]);
+        if (zeroRow(row)) exitRow = i;
+      });
+    });
+  } else {
+    const exitCol = isIdentityMultiple(this.column(exit));
+    exitRow = exitCol.location - 1;
+  }
+  const nextMatrix = this.pivotPreserveIntegers(exitRow, enter-1);
   nextMatrix.beta = beta;
   nextMatrix.pi = pi;
 
   return nextMatrix;
-}
+};
 
 /* Determine the basis and parameter set for a simplex tableau */
 
-Matrix.prototype.basis = function() {
-  const poss_cols = new Set(Array.from(Array(this.arr[0].length-2).keys()).map(i => i+1));
-  const cols = [...poss_cols].map(j => ({ ...{col: j }, ...isIdentityMultiple(this.column(j))}));
-  const id_cols = new Set(cols.filter(c => c.is_identity).map(c => c.col));
-  return {beta: id_cols, pi: poss_cols.symmetricDifference(id_cols)};
-}
-
+Matrix.prototype.basis = function () {
+  const poss_cols = new Set(Array.from(Array(this.arr[0].length - 2).keys()).map((i) => i + 1));
+  const cols = [...poss_cols].map((j) => ({ ...{ col: j }, ...isIdentityMultiple(this.column(j)) }));
+  const id_cols = new Set(cols.filter((c) => c.is_identity).map((c) => c.col));
+  return { beta: id_cols, pi: poss_cols.symmetricDifference(id_cols) };
+};
 
 /* Mulitply a Row of the matrix by a number (and add to a multiple of another row) */
 
@@ -864,18 +884,18 @@ PivotPreserveIntegers.prototype.toLaTeX = function () {
 
 TableauPivot.prototype = new ElementaryRowOperation();
 TableauPivot.prototype.constructor = TableauPivot;
-function TableauPivot(i,j) {
+function TableauPivot(i, j) {
   this.enter = i;
   this.exit = j;
 }
 
 TableauPivot.prototype.toString = function () {
   return `TableauPivot(${this.enter},${this.exit})`;
-}
+};
 
 TableauPivot.prototype.toLaTeX = function () {
   return `${this.enter} \\mapsto ${this.exit}`;
-}
+};
 
 ToDecimal.prototype = new ElementaryRowOperation();
 ToDecimal.prototype.constructor = ToDecimal;

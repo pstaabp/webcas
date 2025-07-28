@@ -268,7 +268,7 @@ function rowOpInput() {
     inputGroup.appendChild(addRowButton);
   }
 
-  if (settings.pivButton) {
+  if (settings.showClickPivot) {
     const pivotButton = document.createElement("button");
     pivotButton.id = "LaTeX-button";
     pivotButton.classList.add("btn", "btn-outline-secondary");
