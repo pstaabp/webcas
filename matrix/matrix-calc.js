@@ -43,7 +43,6 @@ function loadStorage() {
     const key = localStorage.key(i);
     const match = /matrix\-(\w+)/.exec(key);
     if (match) {
-      const name = match[1];
       const m = new Matrix(
         localStorage
           .getItem(key)
@@ -105,10 +104,8 @@ function updateMatrices() {
       div1.appendChild(deleteButton);
       cell2.appendChild(div1);
       row1.appendChild(cell2);
-      // row2.appendChild(cell2);
-      // row2.appendChild(cell3);
+
       table.appendChild(row1);
-      // table.appendChild(row2);
       liEl.appendChild(table);
       document.getElementById("matrices").appendChild(liEl);
     }
@@ -251,6 +248,8 @@ function matrixOperation(oper, var1, var2) {
   }
 }
 
+const transposeRe = /^([a-zA-Z]\w+)'$/;
+
 function parseInput(str) {
   var output;
 
@@ -280,6 +279,13 @@ function parseInput(str) {
             expr: "\\mbox{aug(}" + ops[2] + "," + ops[3] + ")",
           };
       }
+    } else if (transposeRe.test(str)) {
+      const out = transposeRe.exec(str);
+      const m = getMatrix(out[1]);
+      output = {
+        matrix: m.matrix.transpose(),
+        expr: `${m.expr}^{\\intercal}`
+      };
     } else {
       throw "I don't understand the operation: " + str;
     }
